@@ -4,8 +4,19 @@ import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { CloudflareEmailRouteRule} from '../../constants/Types'
 
 export default function HomeScreen() {
+
+  const ForwardRuleCard = (rule: CloudflareEmailRouteRule) => {
+
+    return (
+      <ThemedView>
+        <ThemedText>{rule.name}</ThemedText>
+      </ThemedView>
+    );
+    }
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -16,35 +27,17 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+        <ThemedText type="title">Email manager</ThemedText>
+        
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
+        {list_routing_rules_example.result.map((rule) => {
+          
+          if (rule.actions[0].type === 'forward') {
+           return ForwardRuleCard(rule)
+          }
+
+})}
       </ThemedView>
     </ParallaxScrollView>
   );
@@ -68,3 +61,40 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
 });
+
+
+const list_routing_rules_example = {
+  "errors": [],
+  "messages": [],
+  "success": true,
+  "result": [
+    {
+      "actions": [
+        {
+          "type": "forward",
+          "value": [
+            "destinationaddress@example.net"
+          ]
+        }
+      ],
+      "enabled": true,
+      "id": "a7e6fb77503c41d8a7f3113c6918f10c",
+      "matchers": [
+        {
+          "field": "to",
+          "type": "literal",
+          "value": "test@example.com"
+        }
+      ],
+      "name": "Send to user@example.net rule.",
+      "priority": 0,
+      "tag": "a7e6fb77503c41d8a7f3113c6918f10c"
+    }
+  ],
+  "result_info": {
+    "count": 1,
+    "page": 1,
+    "per_page": 20,
+    "total_count": 1
+  }
+}

@@ -45,13 +45,13 @@ export default function LogInScreen() {
 
       <ThemedText type="subtitle">API key</ThemedText>
       <TextInput
-        style={{ fontFamily: "monospace" }}
+        style={{ fontFamily: "SpaceMono" }}
         placeholder="r:e8h:79f93247fh7:8ckm32ro;;:xxaqsa2"
       ></TextInput>
 
       <ThemedText type="subtitle">Account ID</ThemedText>
       <TextInput
-        style={{ fontFamily: "monospace" }}
+        style={{ fontFamily: "SpaceMono" }}
         placeholder="1234567890"
       ></TextInput>
 
