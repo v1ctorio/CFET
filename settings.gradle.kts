@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "CF email router"
+rootProject.name = "CFER"
 include(":app")
  

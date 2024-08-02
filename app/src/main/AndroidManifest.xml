@@ -10,12 +10,18 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.CFEmailRouter"
+        android:theme="@style/Theme.CFER"
         tools:targetApi="31">
+        <activity
+            android:name=".login.LogInScreen"
+            android:exported="false"
+            android:label="@string/title_activity_log_in_screen"
+            android:theme="@style/Theme.CFER" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.CFEmailRouter">
+            android:label="@string/app_name"
+            android:theme="@style/Theme.CFER">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -4,7 +4,7 @@
     "type": "MERGED_MANIFESTS",
     "kind": "Directory"
   },
-  "applicationId": "com.nosesisaid.cfemailrouter",
+  "applicationId": "com.nosesisaid.cfer",
   "variantName": "debug",
   "elements": [
     {
