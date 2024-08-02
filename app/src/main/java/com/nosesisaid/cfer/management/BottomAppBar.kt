@@ -15,8 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 @Composable
 fun CFERNavigationBar() {
 
-         NavigationBar {
-             NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(Icons.Filled.Search, contentDescription = "Routes managment") })
+         NavigationBar { NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(Icons.Filled.Search, contentDescription = "Routes managment") })
             NavigationBarItem(selected = true, onClick = { /*TODO*/ }, icon = { Icon(Icons.Filled.Email, contentDescription = "Email tab") })
          }
 
