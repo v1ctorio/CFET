@@ -1,6 +1,7 @@
 package com.nosesisaid.cfer.login
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.activity.ComponentActivity
@@ -56,6 +57,15 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 public fun SingInScreen(navController: NavController) {
+    val context = LocalContext.current
+
+    val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
+
+    if (sharedPref.contains("email") && sharedPref.contains("APIKey") && sharedPref.contains("userId")) {
+        navController.navigate("manageEmails")
+    }
+
+
     val API_KEY_GENERATOR_ENDPOINT = "https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%5B%7B%22key%22%3A%22email_routing_address%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22email_routing_rule%22%2C%22type%22%3A%22edit%22%7D%5D&name=CFEMTtoken&accountId=*&zoneId=all";
     val uriHandler = LocalUriHandler.current
 
@@ -65,7 +75,6 @@ public fun SingInScreen(navController: NavController) {
 
     var errorMessage by remember { mutableStateOf("") }
 
-    val context = LocalContext.current
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
