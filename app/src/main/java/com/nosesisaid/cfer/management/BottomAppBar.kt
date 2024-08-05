@@ -12,7 +12,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 
 
-@Preview
 @Composable
 fun CFERNavigationBar(isEmailsSelected: Boolean,nav: NavController) {
 
