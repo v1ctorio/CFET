@@ -114,11 +114,15 @@ public fun SingInScreen(navController: NavController) {
                     onValueChange ={}
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = {         navController.navigate("manageEmails") }, modifier = Modifier.fillMaxWidth()) {
                     Text("Log in")
                 }
             }
 
         }
     )
+
+    fun onLogInSubmit() {
+        navController.navigate("manageEmails")
+    }
 }
