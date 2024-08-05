@@ -5,20 +5,21 @@ import com.google.gson.Gson
 import fuel.Fuel
 import fuel.get
 import java.io.Reader
-import com.google.gson.
 import com.google.gson.JsonDeserializer
+import fuel.httpGet
+import gson
 
-class resultTokenValidatonResponse {
-    val id: String = ""
-    val status: String = ""
-}
+data class resultTokenValidatonResponse (
+    val id: String,
+    val status: String
+)
 
-class TokenValidatonResponse {
-    val success: Boolean = false
-    val errors: List<String> = emptyList()
-    val messages: List<String> = emptyList()
-    val result: resultTokenValidatonResponse = resultTokenValidatonResponse()
-}
+data class TokenValidatonResponse(
+    val success: Boolean,
+    val errors: List<String> ,
+    val messages: List<String> ,
+    val result: resultTokenValidatonResponse ,
+)
 
 fun SaveLogInData(email: String, APIKey: String, userId:String,context: Context):String {
 
@@ -45,8 +46,9 @@ fun SaveLogInData(email: String, APIKey: String, userId:String,context: Context)
 }
 
 suspend fun validate_token(token:String ):Boolean{
-    val res = Fuel.get("https://api.cloudflare.com/client/v4/user/tokens/verify", headers = mapOf("Authorization" to "Bearer $token")).body
-
+    "https://api.cloudflare.com/client/v4/user/tokens/verify".httpGet(
+        headers = mapOf("Authorization " to "Bearer $token")
+    ).responseObject()
 
     return TODO("Provide the return value")
 }
@@ -55,8 +57,3 @@ fun isEmailValid(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
-class TokenValidationDeserializer  {
-    fun deserialize(reader:Reader): TokenValidatonResponse {
-        return Gson().fromJson(reader, TokenValidatonResponse::class.java)
-    }
-}

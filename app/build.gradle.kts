@@ -67,9 +67,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("androidx.navigation:navigation-compose:2.7.5")
-    implementation("com.github.kittinunf.fuel:fuel:3.0.0-alpha03")
-    implementation("com.github.kittinunf.fuel:fuel-gson:3.0.0-alpha03")
-    implementation("com.github.kittinunf.fuel:fuel-android:3.0.0-alpha03")
+    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
+    implementation("com.github.kittinunf.fuel:fuel-gson:2.3.1")
+    implementation("com.github.kittinunf.fuel:fuel-android:2.3.1")
     implementation("com.google.code.gson:gson:2.10.1")
 
 
