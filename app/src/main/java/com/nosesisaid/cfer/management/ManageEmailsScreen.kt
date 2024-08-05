@@ -46,7 +46,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
 fun ManageEmailsScreen(navController: NavController) {
 
@@ -62,7 +61,10 @@ topBar = { TopAppBar(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         titleContentColor = MaterialTheme.colorScheme.primary
     ))},
-        bottomBar = { CFERNavigationBar() },
+        bottomBar = { CFERNavigationBar(
+            isEmailsSelected = true,
+            nav = navController
+        ) },
         floatingActionButton = {
                                FloatingActionButton(onClick = { showBottomSheet = true }) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add email")

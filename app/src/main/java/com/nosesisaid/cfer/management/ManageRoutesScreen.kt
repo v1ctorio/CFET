@@ -68,7 +68,10 @@ fun ManageRoutesScreen(navController: NavController) {
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.primary
             ))},
-        bottomBar = { CFERNavigationBar() },
+        bottomBar = { CFERNavigationBar(
+            isEmailsSelected = false,
+            nav = navController
+        ) },
         floatingActionButton = {
             FloatingActionButton(onClick = { showBottomSheet = true }) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add email")

@@ -67,7 +67,7 @@ public fun SingInScreen(navController: NavController) {
             Column(
                 modifier = Modifier
                     .padding(cpadding)
-                    .padding(12.dp)
+                    .padding(16.dp)
                     .fillMaxWidth()
             )
             {

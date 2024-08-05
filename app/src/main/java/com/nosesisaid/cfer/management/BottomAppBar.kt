@@ -9,14 +9,22 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 
 
 @Preview
 @Composable
-fun CFERNavigationBar() {
+fun CFERNavigationBar(isEmailsSelected: Boolean,nav: NavController) {
 
-         NavigationBar { NavigationBarItem(selected = false, onClick = { /*TODO*/ }, icon = { Icon(Icons.Filled.Search, contentDescription = "Routes managment") })
-            NavigationBarItem(selected = true, onClick = { /*TODO*/ }, icon = { Icon(Icons.Filled.Email, contentDescription = "Email tab") })
+         NavigationBar {
+            NavigationBarItem(selected = !isEmailsSelected,
+                onClick = { nav.navigate("manageRoutes") },
+                icon = { Icon(Icons.Filled.Search, contentDescription = "Routes managment") })
+
+            NavigationBarItem(selected = isEmailsSelected,
+                onClick = { nav.navigate("manageEmails") },
+                icon = { Icon(Icons.Filled.Email, contentDescription = "Email tab" )
+                })
          }
 
 }
