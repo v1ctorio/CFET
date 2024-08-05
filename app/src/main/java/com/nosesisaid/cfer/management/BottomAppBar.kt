@@ -18,12 +18,23 @@ fun CFERNavigationBar(isEmailsSelected: Boolean,nav: NavController) {
 
          NavigationBar {
             NavigationBarItem(selected = !isEmailsSelected,
-                onClick = { nav.navigate("manageRoutes") },
+                onClick = {
+                    if (isEmailsSelected) {
+                        nav.navigate("manageRoutes")
+
+                    };
+
+                          },
                 icon = { Icon(Icons.Filled.Search, contentDescription = "Routes managment") })
 
             NavigationBarItem(selected = isEmailsSelected,
-                onClick = { nav.navigate("manageEmails") },
-                icon = { Icon(Icons.Filled.Email, contentDescription = "Email tab" )
+                onClick = {
+                    if (!isEmailsSelected) {
+                        nav.navigate("manageEmails")
+                    }
+                    },
+                icon = {
+                    Icon(Icons.Filled.Email, contentDescription = "Email tab" )
                 })
          }
 

@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
@@ -87,6 +88,7 @@ topBar = { TopAppBar(
                 )) {
 
                     Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Email",modifier= Modifier
                             .padding(16.dp)
@@ -115,8 +117,9 @@ topBar = { TopAppBar(
                         Text(text = "Verified",
                             Modifier
                                 .padding(16.dp)
-                                .width(50.dp)
-                        )
+                                .width(50.dp),
+                            maxLines = 1,
+                            )
                         IconButton(onClick = { /*TODO*/ }, modifier = Modifier.width(90.dp)) {
                             Icon(imageVector = Icons.Filled.Clear, contentDescription ="Delte email" )
                         }
@@ -137,8 +140,9 @@ topBar = { TopAppBar(
                         Text(text = "Pending",
                             Modifier
                                 .padding(16.dp)
-                                .width(50.dp)
-                        )
+                                .width(50.dp),
+                            maxLines = 1,
+                            )
                         IconButton(onClick = { /*TODO*/ }, modifier = Modifier.width(90.dp)) {
                             Icon(imageVector = Icons.Filled.Clear, contentDescription ="Delte email" )
                         }
