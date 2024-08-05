@@ -47,11 +47,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
-fun ManageRoutesScreen() {
+fun ManageRoutesScreen(navController: NavController) {
     val possibleActions = listOf("Forward", "Worker", "Discard")
 
     var showBottomSheet by remember { mutableStateOf(false) }

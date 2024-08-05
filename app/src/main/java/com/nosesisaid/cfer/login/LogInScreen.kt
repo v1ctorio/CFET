@@ -36,11 +36,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun SingInScreen() {
+public fun SingInScreen(navController: NavController) {
+    val API_KEY_GENERATOR_ENDPOINT = "https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%5B%7B%22key%22%3A%22email_routing_address%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22email_routing_rule%22%2C%22type%22%3A%22edit%22%7D%5D&name=CFEMTtoken&accountId=*&zoneId=all";
+
     val uriHandler = LocalUriHandler.current
     Scaffold (
         topBar= {
@@ -70,7 +72,7 @@ fun SingInScreen() {
             )
             {
 
-                ElevatedButton(onClick = { uriHandler.openUri("https://dash.cloudflare.com/profile/api-tokens") },
+                ElevatedButton(onClick = { uriHandler.openUri(API_KEY_GENERATOR_ENDPOINT) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp),
