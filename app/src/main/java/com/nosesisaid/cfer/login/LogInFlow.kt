@@ -1,59 +1,75 @@
 package com.nosesisaid.cfer.login
 
 import android.content.Context
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.gson.responseObject
+import com.github.kittinunf.result.Result
 import com.google.gson.Gson
-import fuel.Fuel
-import fuel.get
-import java.io.Reader
-import com.google.gson.JsonDeserializer
-import fuel.httpGet
-import gson
 
-data class resultTokenValidatonResponse (
+data class ResultTokenValidationResponse(
     val id: String,
     val status: String
 )
 
-data class TokenValidatonResponse(
+data class TokenValidationResponse(
     val success: Boolean,
-    val errors: List<String> ,
-    val messages: List<String> ,
-    val result: resultTokenValidatonResponse ,
+    val errors: List<String>,
+  //  val messages: List<String>,
+    val result: ResultTokenValidationResponse
 )
 
-fun SaveLogInData(email: String, APIKey: String, userId:String,context: Context):String {
 
 
-
-    if (email.isEmpty() || APIKey.isEmpty() || userId.isEmpty()) {
-        return "You must fill all the fields"
-    }
-    if (!isEmailValid(email)) {
-        return "Invalid email"
-    }
-    if (!validate_token(APIKey)) {
-        return "Invalid API Key"
-    }
-
-    val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
-    with (sharedPref.edit()) {
-        putString("email", email)
-        putString("APIKey", APIKey)
-        putString("userId", userId)
-        apply()
-    }
-    return "success"
+class TokenValidationResponseDeserializer : com.github.kittinunf.fuel.core.ResponseDeserializable<TokenValidationResponse> {
+    override fun deserialize(content: String): TokenValidationResponse =
+        Gson().fromJson(content, TokenValidationResponse::class.java)
 }
 
-suspend fun validate_token(token:String ):Boolean{
-    "https://api.cloudflare.com/client/v4/user/tokens/verify".httpGet(
-        headers = mapOf("Authorization " to "Bearer $token")
-    ).responseObject()
+fun saveLogInData(email: String, APIKey: String, userId: String, context: Context, callback: (String) -> Unit) {
+    if (email.isEmpty() || APIKey.isEmpty() || userId.isEmpty()) {
+        callback("You must fill all the fields")
+        return
+    }
+    if (!isEmailValid(email)) {
+        callback("Invalid email")
+        return
+    }
+    validateToken(APIKey) { isValid ->
+        if (!isValid) {
+            callback("Invalid API Key")
+            return@validateToken
+        }
+        val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("email", email)
+            putString("APIKey", APIKey)
+            putString("userId", userId)
+            apply()
+        }
+        callback("success")
+    }
+}
 
-    return TODO("Provide the return value")
+fun validateToken(token: String, callback: (Boolean) -> Unit) {
+    "https://api.cloudflare.com/client/v4/user/tokens/verify"
+        .httpGet()
+        .header("Authorization" to "Bearer $token")
+        .responseObject(TokenValidationResponseDeserializer()) { _, _, result ->
+            when (result) {
+                is Result.Failure -> {
+                    val ex = result.getException()
+                    println("Error: ${ex.message}")
+                    callback(false)
+                }
+                is Result.Success -> {
+                    val response = result.get()
+                    println("Token validation success: ${response.success}")
+                    callback(response.success)
+                }
+            }
+        }
 }
 
 fun isEmailValid(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
-
