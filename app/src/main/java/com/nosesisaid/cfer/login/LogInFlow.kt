@@ -25,15 +25,12 @@ class TokenValidationResponseDeserializer : com.github.kittinunf.fuel.core.Respo
         Gson().fromJson(content, TokenValidationResponse::class.java)
 }
 
-fun saveLogInData(email: String, APIKey: String, userId: String, context: Context, callback: (String) -> Unit) {
-    if (email.isEmpty() || APIKey.isEmpty() || userId.isEmpty()) {
+fun saveLogInData(zoneId: String, APIKey: String, userId: String, context: Context, callback: (String) -> Unit) {
+    if (zoneId.isEmpty() || APIKey.isEmpty() || userId.isEmpty()) {
         callback("You must fill all the fields")
         return
     }
-    if (!isEmailValid(email)) {
-        callback("Invalid email")
-        return
-    }
+
     validateToken(APIKey) { isValid ->
         if (!isValid) {
             callback("Invalid API Key")
@@ -41,7 +38,7 @@ fun saveLogInData(email: String, APIKey: String, userId: String, context: Contex
         }
         val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
         with(sharedPref.edit()) {
-            putString("email", email)
+            putString("zoneId", zoneId)
             putString("APIKey", APIKey)
             putString("userId", userId)
             apply()
@@ -68,8 +65,4 @@ fun validateToken(token: String, callback: (Boolean) -> Unit) {
                 }
             }
         }
-}
-
-fun isEmailValid(email: String): Boolean {
-    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }

@@ -80,10 +80,9 @@ fun fetchEmails(page: Int, context: Context, callback: (emailListResponse?) -> U
     val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
     val account_identifier = sharedPref.getString("userId", "null") ?: "null"
     val token = sharedPref.getString("APIKey", "null") ?: "null"
-    val email = sharedPref.getString("email", "null") ?: "null"
 
 
-    println("$email,$token,$account_identifier")
+    println("$token,$account_identifier")
     if (account_identifier == "null") {
         callback(null)
         return
@@ -120,7 +119,6 @@ fun fetchEmails(page: Int, context: Context, callback: (emailListResponse?) -> U
                 }
             }
 
-    callback(exampleResponse)
 }
 
 

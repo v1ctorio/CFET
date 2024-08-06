@@ -194,7 +194,7 @@ topBar = { TopAppBar(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Box {
+            Box(modifier = Modifier.fillMaxSize()) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
                 } else {

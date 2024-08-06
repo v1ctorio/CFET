@@ -69,7 +69,7 @@ public fun SingInScreen(navController: NavController) {
     val API_KEY_GENERATOR_ENDPOINT = "https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%5B%7B%22key%22%3A%22email_routing_address%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22email_routing_rule%22%2C%22type%22%3A%22edit%22%7D%5D&name=CFEMTtoken&accountId=*&zoneId=all";
     val uriHandler = LocalUriHandler.current
 
-    var email by remember { mutableStateOf("") }
+    var zoneId by remember { mutableStateOf("") }
     var APIKey by remember { mutableStateOf("") }
     var userId by remember { mutableStateOf("") }
 
@@ -126,13 +126,13 @@ public fun SingInScreen(navController: NavController) {
                 Text(text = "Login to your CF account using an API key.")
                 Text(text = "Email", modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.titleMedium)
                 OutlinedTextField(
-                    value = email,
+                    value = zoneId,
                     label={
-                        Text("Email")
+                        Text("Zone ID")
                           },
                     modifier = Modifier.fillMaxWidth(),
                     onValueChange ={
-                        email = it
+                        zoneId = it
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
@@ -162,7 +162,7 @@ public fun SingInScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(onClick = {
 
-                    saveLogInData(email, APIKey, userId, context) { result ->
+                    saveLogInData(zoneId, APIKey, userId, context) { result ->
                         if (result == "success") {
                             navController.navigate("manageEmails")
                         } else {
