@@ -52,7 +52,7 @@ import androidx.navigation.NavController
 fun ManageEmailsScreen(navController: NavController) {
 
     val exampleResponse = emailListResponse(
-        emails = listOf(
+        result = listOf(
             email(
                 created = "2024-08-01T12:00:00Z",
                 email = "example1@example.com",
@@ -76,7 +76,9 @@ fun ManageEmailsScreen(navController: NavController) {
             page = 1,
             per_page = 10,
             total_count = 2
-        )
+        ),
+        errors = emptyList<CloudflareError>(),
+        messages = emptyList<CloudflareMessage>()
     )
     var emails by remember { mutableStateOf(exampleResponse) }
 
@@ -189,7 +191,7 @@ topBar = { TopAppBar(
                     }
                 }
 
-                emails.emails.map {
+                emails.result.map {
                     ElevatedCard(
                         modifier = Modifier
                             .fillMaxWidth()

@@ -4,15 +4,13 @@ import android.content.Context
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
-
-
-
-
+import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
 
 
 //FOR DEBUG
 val exampleResponse = emailListResponse(
-    emails = listOf(
+    result = listOf(
         email(
             created = "2024-08-01T12:00:00Z",
             email = "example1@example.com",
@@ -35,8 +33,10 @@ val exampleResponse = emailListResponse(
         count = 2,
         page = 1,
         per_page = 10,
-        total_count = 2
-    )
+        total_count = 2,
+    ),
+    errors = emptyList<CloudflareError>(),
+    messages = emptyList<CloudflareMessage>()
 )
 //ENd
 
@@ -45,6 +45,17 @@ val exampleResponse = emailListResponse(
 
 
 //Types
+
+data class CloudflareError(
+    val code: Int,
+    val message: String,
+)
+
+data class CloudflareMessage(
+    val code: Int,
+    val message: String,
+)
+
 data class resultInfo (
     val count: Int,
     val page: Int,
@@ -63,10 +74,10 @@ data class email (
 
 data class emailListResponse
     (
-    val emails: List<email>,
+    val result: List<email>,
     val success: Boolean,
-    //val errors: List<String>,
-    //val messages: List<String>,
+    val errors: List<CloudflareError>,
+    val messages: List<CloudflareMessage>,
     val result_info: resultInfo
 )
 
@@ -88,33 +99,35 @@ fun fetchEmails(page: Int,context: Context, callback: (emailListResponse?) -> Un
         .header("Authorization" to "Bearer $token")
         .header("Content-Type" to "application/json")
         .header("Accept" to "application/json")
-        .responseString {
-            request, response, result ->
+        .responseString { request, response, result ->
             println(request)
             println(response)
             println(result)
 
+            when (result) {
+                is com.github.kittinunf.result.Result.Failure -> {
+                    val ex = result.getException()
+                    println(ex)
+                    callback(null)
+                }
+                is com.github.kittinunf.result.Result.Success -> {
+                    val data = result.get()
+                    //val emailListResponses: List<emailListResponse> = Gson().fromJson(data, object : TypeToken<List<emailListResponse>>() {}.type)
+                    //val emailListResponse = emailListResponses.firstOrNull()
+                    val jsonObject = Gson().fromJson(data, JsonObject::class.java)
+                    val emailListResponse = Gson().fromJson(jsonObject, emailListResponse::class.java)
+                    println(emailListResponse)
+                    callback(emailListResponse)
+                }
+            }
         }
-
-//        .responseObject(EmailListResponseDeserializer()) { _, _, result ->
-//            when (result) {
-//                is com.github.kittinunf.result.Result.Failure -> {
-//                    val ex = result.getException()
-//                    println(ex)
-//                    callback(null)
-//                }
-//                is com.github.kittinunf.result.Result.Success -> {
-//                    val data = result.get()
-//                    println(data)
-//                    callback(data)
-//                }
-//            }
-//        }
 
     callback(exampleResponse)
 }
 
-class EmailListResponseDeserializer : ResponseDeserializable<emailListResponse> {
-    override fun deserialize(content: String): emailListResponse =
-        Gson().fromJson(content, emailListResponse::class.java)
-}
+
+//
+//class EmailListResponseDeserializer : ResponseDeserializable<emailListResponse> {
+//    override fun deserialize(content: String): emailListResponse =
+//        //Gson().fromJson(content, emailListResponse)
+//}
