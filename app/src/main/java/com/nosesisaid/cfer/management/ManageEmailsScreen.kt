@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.sharp.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -50,11 +52,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageEmailsScreen(navController: NavController) {
+
+
 
     val exampleResponse = emailListResponse(
         result = listOf(
@@ -124,8 +129,16 @@ topBar = { TopAppBar(
             nav = navController
         ) },
         floatingActionButton = {
+            Column {
+
+            Icon(imageVector = Icons.Sharp.Refresh,
+                contentDescription = "Refresh",
+            //    modifier=Modifier.size(1.dp)
+            )
                                FloatingActionButton(onClick = { showBottomSheet = true }) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add email")
+                                       Icon(imageVector = Icons.Filled.Add, contentDescription = "Add email")
+
+                                   }
             }
 
         },
@@ -166,6 +179,7 @@ topBar = { TopAppBar(
                         CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
                     } else {
                         LazyColumn(
+
                             modifier = Modifier.fillMaxSize(),
                             content
                             = {
@@ -188,7 +202,9 @@ topBar = { TopAppBar(
                                             )
                                             Text(
                                                 email.verified,
-                                                Modifier.padding(16.dp).width(50.dp),
+                                                Modifier
+                                                    .padding(16.dp)
+                                                    .width(50.dp),
                                                 maxLines = 1
                                             )
                                             IconButton(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
