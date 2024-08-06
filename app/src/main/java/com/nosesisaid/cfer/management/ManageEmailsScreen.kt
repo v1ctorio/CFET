@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.management.api.CloudflareError
 import com.nosesisaid.cfer.management.api.CloudflareMessage
+import com.nosesisaid.cfer.management.api.createEmail
 import com.nosesisaid.cfer.management.api.deleteEmail
 import com.nosesisaid.cfer.management.api.email
 import com.nosesisaid.cfer.management.api.emailListResponse
@@ -108,13 +109,8 @@ fun ManageEmailsScreen(navController: NavController) {
     var isLoading by remember { mutableStateOf(true) }
     var emails by remember { mutableStateOf(emptyList<email>()) }
     val context = LocalContext.current
-//    fetchEmails(2, context) {
-//        if (it == null) {
-//            println("Failed to fetch emails.")
-//            return@fetchEmails
-//        }
-//        emails = it.result
-//    }
+
+    var newTargetEmail by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         fetchEmails(1, context) { response ->
@@ -310,21 +306,34 @@ topBar = { TopAppBar(
                     ) {
 
                         Text(
-                            "Add a new Target Email to your account.",
+                            "Add a new Target Email Address to your account.",
 
                             style = MaterialTheme.typography.titleLarge
                         )
                         OutlinedTextField(
-                            value = "",
-                            onValueChange = {},
-                            label = { Text("Email adress") },
+                            value = newTargetEmail,
+                            onValueChange = {
+                                newTargetEmail = it
+                            },
+                            label = { Text("Email address") },
 
                             modifier = Modifier
                                 .fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
-                            Text("Add Email")
+                        Button(onClick = {
+                            createEmail(newTargetEmail, context) { r ->
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = r,
+                                        duration = SnackbarDuration.Long
+                                    )
+                                }
+                                showBottomSheet = false
+                            }
+
+                        }, modifier = Modifier.fillMaxWidth()) {
+                            Text("Add Target Email")
                         }
                     }
 
