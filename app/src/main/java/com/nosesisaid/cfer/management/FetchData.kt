@@ -5,6 +5,45 @@ import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.httpGet
 import com.google.gson.Gson
 
+
+
+
+
+
+//FOR DEBUG
+val exampleResponse = emailListResponse(
+    emails = listOf(
+        email(
+            created = "2024-08-01T12:00:00Z",
+            email = "example1@example.com",
+            id = "1",
+            modified = "2024-08-02T12:00:00Z",
+            tag = "newsletter",
+            verified = "true"
+        ),
+        email(
+            created = "2024-08-01T13:00:00Z",
+            email = "example2@example.com",
+            id = "2",
+            modified = "2024-08-02T13:00:00Z",
+            tag = "promotion",
+            verified = "false"
+        )
+    ),
+    success = true,
+    result_info = resultInfo(
+        count = 2,
+        page = 1,
+        per_page = 10,
+        total_count = 2
+    )
+)
+//ENd
+
+
+
+
+
 //Types
 data class resultInfo (
     val count: Int,
@@ -31,35 +70,51 @@ data class emailListResponse
     val result_info: resultInfo
 )
 
-fun fetchEmails(token: String, page: Int,context: Context, callback: (emailListResponse?) -> Unit) {
+fun fetchEmails(page: Int,context: Context, callback: (emailListResponse?) -> Unit) {
     val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
-    val account_identifier = sharedPref.getString("userId", "null") ?: "null"
+        val account_identifier = sharedPref.getString("userId", "null") ?: "null"
+        val token = sharedPref.getString("APIKey", "null") ?: "null"
+    val email = sharedPref.getString("email", "null") ?: "null"
+
+
+    println("$email,$token,$account_identifier")
     if (account_identifier == "null") {
         callback(null)
         return
     }
 
-    "https://api.cloudflare.com/client/v4\n" +
-            "/accounts/$account_identifier/email/routing/addresses"
+    var a = "https://api.cloudflare.com/client/v4/accounts/$account_identifier/email/routing/addresses"
         .httpGet()
         .header("Authorization" to "Bearer $token")
         .header("Content-Type" to "application/json")
         .header("Accept" to "application/json")
-        .responseObject(emailListResponseDeserializer()) { _, _, result ->
-            when (result) {
-                is com.github.kittinunf.result.Result.Failure -> {
-                    val ex = result.getException()
-                    callback(null)
-                }
-                is com.github.kittinunf.result.Result.Success -> {
-                    val data = result.get()
-                    callback(data)
-                }
-            }
+        .responseString {
+            request, response, result ->
+            println(request)
+            println(response)
+            println(result)
+
         }
+
+//        .responseObject(EmailListResponseDeserializer()) { _, _, result ->
+//            when (result) {
+//                is com.github.kittinunf.result.Result.Failure -> {
+//                    val ex = result.getException()
+//                    println(ex)
+//                    callback(null)
+//                }
+//                is com.github.kittinunf.result.Result.Success -> {
+//                    val data = result.get()
+//                    println(data)
+//                    callback(data)
+//                }
+//            }
+//        }
+
+    callback(exampleResponse)
 }
 
-class emailListResponseDeserializer : ResponseDeserializable<emailListResponse> {
+class EmailListResponseDeserializer : ResponseDeserializable<emailListResponse> {
     override fun deserialize(content: String): emailListResponse =
         Gson().fromJson(content, emailListResponse::class.java)
 }

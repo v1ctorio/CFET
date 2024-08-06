@@ -43,12 +43,52 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageEmailsScreen(navController: NavController) {
+
+    val exampleResponse = emailListResponse(
+        emails = listOf(
+            email(
+                created = "2024-08-01T12:00:00Z",
+                email = "example1@example.com",
+                id = "1",
+                modified = "2024-08-02T12:00:00Z",
+                tag = "newsletter",
+                verified = "true"
+            ),
+            email(
+                created = "2024-08-01T13:00:00Z",
+                email = "example2@example.com",
+                id = "2",
+                modified = "2024-08-02T13:00:00Z",
+                tag = "promotion",
+                verified = "false"
+            )
+        ),
+        success = true,
+        result_info = resultInfo(
+            count = 2,
+            page = 1,
+            per_page = 10,
+            total_count = 2
+        )
+    )
+    var emails by remember { mutableStateOf(exampleResponse) }
+
+    val context = LocalContext.current
+    fetchEmails(2, context) {
+        if (it == null) {
+            println("Failed to fetch emails.")
+            return@fetchEmails
+        }
+        emails = it
+    }
+
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(
@@ -148,6 +188,33 @@ topBar = { TopAppBar(
                         }
                     }
                 }
+
+                emails.emails.map {
+                    ElevatedCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Row {
+
+                            Text(it.email,
+                                Modifier
+                                    .padding(16.dp)
+                                    .width(160.dp), maxLines = 1)
+                            Text(text = if (it.verified == "true") "Verified" else "Pending",
+                                Modifier
+                                    .padding(16.dp)
+                                    .width(50.dp),
+                                maxLines = 1,
+                                )
+                            IconButton(onClick = { /*TODO*/ }, modifier = Modifier.width(90.dp)) {
+                                Icon(imageVector = Icons.Filled.Clear, contentDescription ="Delte email" )
+                            }
+                        }
+                    }
+                }
+
                 if (showBottomSheet) {
                     ModalBottomSheet(
                         modifier = Modifier.fillMaxHeight(),
