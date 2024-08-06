@@ -69,7 +69,7 @@ data class email (
     val id: String,
     val modified: String,
     val tag: String,
-    val verified: String,
+    val verified: String?,
 )
 
 data class emailListResponse

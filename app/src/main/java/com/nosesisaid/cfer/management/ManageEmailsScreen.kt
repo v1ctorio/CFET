@@ -6,16 +6,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -35,7 +39,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -47,18 +55,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageEmailsScreen(navController: NavController) {
 
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
 
     val exampleResponse = emailListResponse(
@@ -118,6 +132,11 @@ fun ManageEmailsScreen(navController: NavController) {
     )
 
     Scaffold (
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState,
+            modifier = Modifier.padding(
+                WindowInsets.ime.asPaddingValues()),)
+    },
+
 topBar = { TopAppBar(
     title = { Text(text = "Emails") },
     colors = topAppBarColors(
@@ -129,17 +148,12 @@ topBar = { TopAppBar(
             nav = navController
         ) },
         floatingActionButton = {
-            Column {
 
-            Icon(imageVector = Icons.Sharp.Refresh,
-                contentDescription = "Refresh",
-            //    modifier=Modifier.size(1.dp)
-            )
                                FloatingActionButton(onClick = { showBottomSheet = true }) {
                                        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add email")
 
                                    }
-            }
+
 
         },
         content = { cpadding ->
@@ -200,13 +214,38 @@ topBar = { TopAppBar(
                                                     .width(160.dp),
                                                 maxLines = 1
                                             )
-                                            Text(
-                                                email.verified,
-                                                Modifier
-                                                    .padding(16.dp)
-                                                    .width(50.dp),
-                                                maxLines = 1
-                                            )
+                                            
+                                            if (email.verified != null){
+                                                    ClickableText(
+                                                    text = AnnotatedString("Verified"),
+                                                    modifier = Modifier.padding(16.dp).width(80.dp),
+                                                    maxLines = 1,
+                                                        onClick = {
+                                                            scope.launch {
+                                                                snackbarHostState.showSnackbar(
+                                                                    message = email.verified,
+                                                                    duration = SnackbarDuration.Short
+                                                                )
+                                                            }
+
+                                                        }
+                                                        )
+
+                                            } else {
+                                                ClickableText(text = AnnotatedString("Pending"),
+                                                    modifier = Modifier.padding(16.dp).width(80.dp),
+                                                    maxLines = 1,
+                                                    onClick = {
+                                                        scope.launch {
+                                                            snackbarHostState.showSnackbar(
+                                                                message = "Pending",
+                                                                duration = SnackbarDuration.Short
+                                                            )
+                                                        }
+                                                    }
+                                                    )
+                                            }
+                                            
                                             IconButton(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
                                                 Icon(
                                                     imageVector = Icons.Filled.Clear,
