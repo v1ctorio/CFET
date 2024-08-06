@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -19,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -37,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,17 +85,27 @@ fun ManageEmailsScreen(navController: NavController) {
         errors = emptyList<CloudflareError>(),
         messages = emptyList<CloudflareMessage>()
     )
-    var emails by remember { mutableStateOf(exampleResponse) }
-
+    var isLoading by remember { mutableStateOf(true) }
+    var emails by remember { mutableStateOf(emptyList<email>()) }
     val context = LocalContext.current
-    fetchEmails(2, context) {
-        if (it == null) {
-            println("Failed to fetch emails.")
-            return@fetchEmails
-        }
-        emails = it
-    }
+//    fetchEmails(2, context) {
+//        if (it == null) {
+//            println("Failed to fetch emails.")
+//            return@fetchEmails
+//        }
+//        emails = it.result
+//    }
 
+    LaunchedEffect(Unit) {
+        fetchEmails(1, context) { response ->
+            if (response != null) {
+                emails = response.result
+            } else {
+                //TODO
+            }
+            isLoading = false
+        }
+    }
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(
@@ -146,74 +161,48 @@ topBar = { TopAppBar(
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Row {
-
-                        Text("chatskdfasfadsfads@nosesisaid.com",
-                            Modifier
-                                .padding(16.dp)
-                                .width(160.dp), maxLines = 1)
-                        Text(text = "Verified",
-                            Modifier
-                                .padding(16.dp)
-                                .width(50.dp),
-                            maxLines = 1,
-                            )
-                        IconButton(onClick = { /*TODO*/ }, modifier = Modifier.width(90.dp)) {
-                            Icon(imageVector = Icons.Filled.Clear, contentDescription ="Delte email" )
-                        }
-                    }
-                }
-                ElevatedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Row {
-
-                        Text("hichat@nosesisaid.com",
-                            Modifier
-                                .padding(16.dp)
-                                .width(160.dp), maxLines = 1)
-                        Text(text = "Pending",
-                            Modifier
-                                .padding(16.dp)
-                                .width(50.dp),
-                            maxLines = 1,
-                            )
-                        IconButton(onClick = { /*TODO*/ }, modifier = Modifier.width(90.dp)) {
-                            Icon(imageVector = Icons.Filled.Clear, contentDescription ="Delte email" )
-                        }
-                    }
-                }
-
-                emails.result.map {
-                    ElevatedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp),
-                        shape = RoundedCornerShape(20.dp)
-                    ) {
-                        Row {
-
-                            Text(it.email,
-                                Modifier
-                                    .padding(16.dp)
-                                    .width(160.dp), maxLines = 1)
-                            Text(text = if (it.verified == "true") "Verified" else "Pending",
-                                Modifier
-                                    .padding(16.dp)
-                                    .width(50.dp),
-                                maxLines = 1,
-                                )
-                            IconButton(onClick = { /*TODO*/ }, modifier = Modifier.width(90.dp)) {
-                                Icon(imageVector = Icons.Filled.Clear, contentDescription ="Delte email" )
+                Box {
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            content
+                            = {
+                                items(emails) { email ->
+                                    ElevatedCard(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 10.dp),
+                                        shape = RoundedCornerShape(20.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                email.email,
+                                                Modifier
+                                                    .padding(16.dp)
+                                                    .width(160.dp),
+                                                maxLines = 1
+                                            )
+                                            Text(
+                                                email.verified,
+                                                Modifier.padding(16.dp).width(50.dp),
+                                                maxLines = 1
+                                            )
+                                            IconButton(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Clear,
+                                                    contentDescription = "Delete"
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                        }
+                        )
+
                     }
                 }
 
