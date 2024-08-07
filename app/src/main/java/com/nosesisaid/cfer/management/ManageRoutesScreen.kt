@@ -1,6 +1,7 @@
 package com.nosesisaid.cfer.management
 
 
+import android.widget.Spinner
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -47,7 +51,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.Typography
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,12 +66,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.management.api.addRoute
 import com.nosesisaid.cfer.management.api.createEmail
 import com.nosesisaid.cfer.management.api.fetchEmails
 import com.nosesisaid.cfer.management.api.fetchRoutes
+import com.nosesisaid.cfer.management.api.route
 import com.nosesisaid.cfer.management.api.updateCatchAllRule
+import com.nosesisaid.cfer.ui.theme.Typography
 import kotlinx.coroutines.launch
 
 
@@ -77,6 +86,7 @@ enum class ActionType {
 @Composable
 fun ManageRoutesScreen(navController: NavController) {
 
+    var isLoading by remember { mutableStateOf(true) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -93,6 +103,33 @@ fun ManageRoutesScreen(navController: NavController) {
     var isNewEmailListDropDownExpanded by remember { mutableStateOf(false) }
     var selectedTargetEmailNewRoute by remember { mutableStateOf(emailsList[0]) }
 
+
+
+    var catchAllRouteEmail by remember { mutableStateOf("") }
+    var isCatchAllDropdownExpanded by remember { mutableStateOf(false) }
+
+    var caroutes_is_checked by remember { mutableStateOf(false) }
+
+    var forwardRules by remember  { mutableStateOf(emptyList<route>())}
+    var dropRules by remember  { mutableStateOf(emptyList<route>())}
+LaunchedEffect(Unit) {
+    fetchRoutes(1,context) { r ->
+        println(r?.result)
+        r?.result?.forEach(){e->
+            if (e.matchers[0].type == "all") {
+                catchAllRouteEmail = e.actions[0].value[0]
+                caroutes_is_checked = e.enabled
+            }
+            else if (e.actions[0].type == "forward") {
+                forwardRules.plus(e)
+            } else if (e.actions[0].type == "drop") {
+                dropRules.plus(e)
+            }
+            println(forwardRules)
+            println(dropRules)
+            isLoading = false
+        }
+    }
     fetchEmails(1,context) { r ->
         r?.result?.forEach { e ->
             if (e.verified != null) {
@@ -102,21 +139,8 @@ fun ManageRoutesScreen(navController: NavController) {
         }
 
     }
+}
 
-    var catchAllRouteEmail by remember { mutableStateOf("") }
-    var isCatchAllDropdownExpanded by remember { mutableStateOf(false) }
-
-    var caroutes_is_checked by remember { mutableStateOf(false) }
-
-    fetchRoutes(1,context) { r ->
-        println(r?.result)
-        r?.result?.forEach(){e->
-            if (e.matchers[0].type == "all") {
-                catchAllRouteEmail = e.actions[0].value[0]
-                caroutes_is_checked = e.enabled
-            }
-        }
-    }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -162,7 +186,7 @@ fun ManageRoutesScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ){
-                        Text(text = "Catch-all route", modifier = Modifier.padding(20.dp))
+                        Text(text = "Catch-all route", modifier = Modifier.padding(20.dp), style = Typography.titleMedium)
                         Spacer(modifier = Modifier.weight(1f))
                         Switch(checked = caroutes_is_checked,
                             onCheckedChange = {
@@ -175,7 +199,7 @@ fun ManageRoutesScreen(navController: NavController) {
                             },
                             modifier = Modifier
                                 .scale(0.7f)
-                                .padding(10.dp))
+                                .padding(8.dp))
                     }
                 }
                 Card(
@@ -224,6 +248,7 @@ fun ManageRoutesScreen(navController: NavController) {
 
                     }
                 }
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -231,75 +256,53 @@ fun ManageRoutesScreen(navController: NavController) {
 
                     Row(
                     ) {
-                        Text("Alias",modifier= Modifier
-                            .padding(16.dp)
-                            .width(60.dp),
-                            textAlign = TextAlign.Center
-                        )
-                        Text("State",modifier= Modifier
-                            .padding(16.dp))
-                        Text(text = "Action", modifier=Modifier.padding(16.dp))
-                        Text("Target",modifier= Modifier
-                            .padding(16.dp)
-                            .width(160.dp),
-                            textAlign = TextAlign.Center
-                        )
-
-
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-
-                    ) {
-
-                        Text("vic",
-
-                            Modifier
-                                .padding(16.dp)
-                                .width(70.dp), maxLines = 1,textAlign = TextAlign.Center)
-                        Checkbox(checked = true, onCheckedChange ={/*TODO*/ },)
-                        Text(text ="Forward", modifier = Modifier
-                            .padding(16.dp)
-                            .width(60.dp), fontSize = 12.sp, textAlign = TextAlign.Center)
-                        Text("hello@chat.hi",modifier= Modifier
-                            .padding(16.dp)
-                            .width(160.dp),
+                        Text("Forward adresses",modifier= Modifier
+                            .padding(16.dp),
                             textAlign = TextAlign.Center,
-                            fontSize = 12.sp
+                            style = Typography.titleMedium
                         )
+
                     }
                 }
-                ElevatedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp),
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                Spacer(modifier = Modifier.height(8.dp))
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.fillMaxWidth())
+                } else {
+                    LazyColumn(
+                        content = {
+                            items(forwardRules) { r ->
+                                ElevatedCard(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 10.dp),
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
 
-                    ) {
+                                    ) {
 
-                        Text("hichat@nosesisaid.com",
-                            Modifier
-                                .padding(16.dp)
-                                .width(160.dp), maxLines = 1)
-                        Text(text = "Pending",
-                            Modifier
-                                .padding(16.dp)
-                                .width(50.dp)
-                        )
-                        IconButton(onClick = { /*TODO*/ }, modifier = Modifier.width(90.dp)) {
-                            Icon(imageVector = Icons.Filled.Clear, contentDescription ="Delte email" )
+                                        Text(r.name,
+                                            Modifier
+                                                .padding(16.dp)
+                                                .width(160.dp), maxLines = 1)
+                                        Text(text = "to",
+                                            Modifier
+                                                .padding(16.dp)
+                                                .width(60.dp)
+                                        )
+                                        Text(r.actions[0].value[0],modifier= Modifier
+                                            .padding(16.dp)
+                                            .width(160.dp)
+                                        )
+                                    }
+                                }
+
+                            }
                         }
-                    }
+                    )
                 }
+
                 if (showBottomSheet) {
                     ModalBottomSheet(sheetState = sheetState, modifier = Modifier.fillMaxHeight(), onDismissRequest = { showBottomSheet = false }) {
                         Column(
