@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.management.api.createEmail
 import com.nosesisaid.cfer.management.api.fetchEmails
+import com.nosesisaid.cfer.management.api.fetchRoutes
 import kotlinx.coroutines.launch
 
 
@@ -92,6 +93,17 @@ fun ManageRoutesScreen(navController: NavController) {
 
     }
 
+    var catchAllRouteEmail by remember { mutableStateOf("") }
+
+    fetchRoutes(1,context) { r ->
+        println(r?.result)
+        r?.result?.forEach(){e->
+            if (e.matchers[0].type == "all") {
+                catchAllRouteEmail = e.actions[0].value[0]
+            }
+        }
+    }
+
     var caroutes_is_checked by remember { mutableStateOf(false) }
     Scaffold (
         topBar = { TopAppBar(
@@ -123,7 +135,7 @@ fun ManageRoutesScreen(navController: NavController) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 10.dp), colors = CardDefaults.cardColors(
+                        .padding(top = 10.dp), colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                     )) {
                     Row (
@@ -137,6 +149,14 @@ fun ManageRoutesScreen(navController: NavController) {
                             .scale(0.7f)
                             .padding(10.dp))
                     }
+                }
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp), colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    )) {
+                    Text(text = catchAllRouteEmail, modifier = Modifier.padding(20.dp))
                 }
 
                 Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
