@@ -1,7 +1,7 @@
 package com.nosesisaid.cfer.management
 
 
-import android.widget.Spinner
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,13 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,7 +30,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -48,28 +44,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
-import androidx.compose.material3.Typography
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.management.api.addRoute
-import com.nosesisaid.cfer.management.api.createEmail
 import com.nosesisaid.cfer.management.api.fetchEmails
 import com.nosesisaid.cfer.management.api.fetchRoutes
 import com.nosesisaid.cfer.management.api.route
@@ -79,7 +68,7 @@ import kotlinx.coroutines.launch
 
 
 enum class ActionType {
-    Forward, Drop, Worker
+    Forward, Drop, //Worker
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,6 +80,9 @@ fun ManageRoutesScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
 
 
+
+    val domain = LocalContext.current.getSharedPreferences("cfer", Context.MODE_PRIVATE).getString("domain", "") ?: ""
+
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
@@ -99,7 +91,9 @@ fun ManageRoutesScreen(navController: NavController) {
     var selectedNewRouteAction by remember { mutableStateOf(ActionType.Forward) }
     var actionTypes = ActionType.entries.toTypedArray()
 
-    var emailsList = mutableListOf<String>("")
+    var emailsList by remember {
+        mutableStateOf(listOf(""))
+    }
     var isNewEmailListDropDownExpanded by remember { mutableStateOf(false) }
     var selectedTargetEmailNewRoute by remember { mutableStateOf(emailsList[0]) }
 
@@ -108,38 +102,43 @@ fun ManageRoutesScreen(navController: NavController) {
     var catchAllRouteEmail by remember { mutableStateOf("") }
     var isCatchAllDropdownExpanded by remember { mutableStateOf(false) }
 
-    var caroutes_is_checked by remember { mutableStateOf(false) }
+    var caroutesIsChecked by remember { mutableStateOf(false) }
 
     var forwardRules by remember  { mutableStateOf(emptyList<route>())}
     var dropRules by remember  { mutableStateOf(emptyList<route>())}
-LaunchedEffect(Unit) {
-    fetchRoutes(1,context) { r ->
-        println(r?.result)
-        r?.result?.forEach(){e->
-            if (e.matchers[0].type == "all") {
-                catchAllRouteEmail = e.actions[0].value[0]
-                caroutes_is_checked = e.enabled
+
+    LaunchedEffect(Unit) {
+        fetchEmails(1, context) { r ->
+            r?.result?.forEach { e ->
+                if (e.verified != null) {
+                    emailsList = emailsList.toMutableList().apply {
+                        remove("")
+                        add(e.email)
+                    }
+                }
             }
-            else if (e.actions[0].type == "forward") {
-                forwardRules.plus(e)
-            } else if (e.actions[0].type == "drop") {
-                dropRules.plus(e)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        fetchRoutes(1, context) { r ->
+            r?.result?.forEach { e ->
+                when {
+                    e.matchers[0].type == "all" -> {
+                        catchAllRouteEmail = e.actions[0].value[0]
+                        caroutesIsChecked = e.enabled
+                    }
+                    e.actions[0].type == "forward" -> {
+                        forwardRules = forwardRules + e
+                    }
+                    e.actions[0].type == "drop" -> {
+                        dropRules = dropRules + e
+                    }
+                }
             }
-            println(forwardRules)
-            println(dropRules)
             isLoading = false
         }
     }
-    fetchEmails(1,context) { r ->
-        r?.result?.forEach { e ->
-            if (e.verified != null) {
-                emailsList.remove("")
-                emailsList.add(e.email)
-            }
-        }
-
-    }
-}
 
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -188,9 +187,9 @@ LaunchedEffect(Unit) {
                     ){
                         Text(text = "Catch-all route", modifier = Modifier.padding(20.dp), style = Typography.titleMedium)
                         Spacer(modifier = Modifier.weight(1f))
-                        Switch(checked = caroutes_is_checked,
+                        Switch(checked = caroutesIsChecked,
                             onCheckedChange = {
-                                caroutes_is_checked = it
+                                caroutesIsChecked = it
                                 updateCatchAllRule(catchAllRouteEmail,it, context) {
                                     scope.launch {
                                         snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
@@ -235,7 +234,7 @@ LaunchedEffect(Unit) {
                                     onClick = {
                                         isCatchAllDropdownExpanded = false
                                         catchAllRouteEmail = option
-                                            updateCatchAllRule(option,caroutes_is_checked, context) {
+                                            updateCatchAllRule(option,caroutesIsChecked, context) {
                                                 scope.launch {
                                                     snackbarHostState.showSnackbar("Catch-all route updated", duration = SnackbarDuration.Short)
                                                 }
@@ -266,7 +265,7 @@ LaunchedEffect(Unit) {
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 if (isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
                 } else {
                     LazyColumn(
                         content = {
@@ -278,22 +277,17 @@ LaunchedEffect(Unit) {
                                     shape = RoundedCornerShape(20.dp)
                                 ) {
                                     Row(
-                                        verticalAlignment = Alignment.CenterVertically
-
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(16.dp)
                                     ) {
 
-                                        Text(r.name,
+                                        Text(r.matchers[0].value.dropLast(domain.length+1),
                                             Modifier
-                                                .padding(16.dp)
-                                                .width(160.dp), maxLines = 1)
+                                                .width(75.dp), maxLines = 1)
                                         Text(text = "to",
-                                            Modifier
-                                                .padding(16.dp)
-                                                .width(60.dp)
+                                            Modifier.padding(horizontal = 12.dp)
                                         )
                                         Text(r.actions[0].value[0],modifier= Modifier
-                                            .padding(16.dp)
-                                            .width(160.dp)
                                         )
                                     }
                                 }
