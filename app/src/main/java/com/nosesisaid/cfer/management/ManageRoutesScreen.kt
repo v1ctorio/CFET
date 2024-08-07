@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.nosesisaid.cfer.management.api.addRoute
 import com.nosesisaid.cfer.management.api.createEmail
 import com.nosesisaid.cfer.management.api.fetchEmails
 import com.nosesisaid.cfer.management.api.fetchRoutes
@@ -119,6 +120,7 @@ fun ManageRoutesScreen(navController: NavController) {
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var newRuleAlias by remember { mutableStateOf("") }
     Scaffold (
         snackbarHost = { SnackbarHost(hostState = snackbarHostState,
             modifier = Modifier.padding(
@@ -305,13 +307,14 @@ fun ManageRoutesScreen(navController: NavController) {
                         ) {
                             Text("Create a new route rule", style = MaterialTheme.typography.titleLarge)
                             Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedTextField(value = "", onValueChange = {  }, label = { Text("Alias") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = newRuleAlias, onValueChange = { newRuleAlias = it }, label = { Text("Alias") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                             ExposedDropdownMenuBox(
                                 expanded = isNewEmailListDropDownExpanded,
                                 onExpandedChange = { isNewEmailListDropDownExpanded = !isNewEmailListDropDownExpanded },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 OutlinedTextField(
+                                    enabled = selectedNewRouteAction != ActionType.Drop,
                                     readOnly = true,
                                     value = selectedTargetEmailNewRoute,
                                     onValueChange = {},
@@ -355,7 +358,13 @@ fun ManageRoutesScreen(navController: NavController) {
                                 }
                             }
                             Button(onClick = {
-                                //TODO
+
+                                addRoute(selectedNewRouteAction,newRuleAlias,selectedTargetEmailNewRoute,context) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                    }
+                                    showBottomSheet = false
+                                }
                             }, modifier = Modifier.fillMaxWidth()) {
                                 Text("Add Target Email")
                             }

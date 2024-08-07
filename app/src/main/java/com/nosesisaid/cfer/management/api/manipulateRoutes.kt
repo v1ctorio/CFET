@@ -40,13 +40,14 @@ fun updateCatchAllRule(targetEmail: String, enabled:Boolean, context: Context, c
         }
 }
 
-fun addRoute(actionType: ActionType, alias:String,targetEmail: String,context: Context,callback: (String) -> Unit){
+fun addRoute(actionType: ActionType, alias:String,targetEmail: String?,context: Context,callback: (String) -> Unit){
 
     val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
     val APIKey = sharedPref.getString("APIKey", "")
     val userId = sharedPref.getString("userId", "")
     val zoneId = sharedPref.getString("zoneId", "")
-    if (APIKey == "" || userId == "" || zoneId == "") {
+    val domain = sharedPref.getString("domain", "")
+    if (APIKey == "" || userId == "" || zoneId == ""||domain=="") {
         callback("You must log in first")
         return
     }
@@ -54,7 +55,15 @@ fun addRoute(actionType: ActionType, alias:String,targetEmail: String,context: C
     val enabled = "true"
     val action = actionType.name.lowercase()
 
-    val body = """
+    var body: String
+
+    if (action == "forward") {
+        if(targetEmail.isNullOrEmpty()) {
+            callback("You must provide a target email")
+            return
+        }
+
+        body = """
         {
           "actions": [
             {
@@ -69,15 +78,58 @@ fun addRoute(actionType: ActionType, alias:String,targetEmail: String,context: C
             {
               "field": "to",
               "type": "literal",
-              "value": "$alias@example.com"
+              "value": "$alias@$domain"
             }
           ],
           "name": "Send to $targetEmail rule.",
           "priority": 0
         }
     """.trimIndent()
+    }
+    else {
+        body = """
+        {
+          "actions": [
+            {
+              "type": "$action",
+              "value": []
+            }
+          ],
+          "enabled": $enabled,
+          "matchers": [
+            {
+              "field": "to",
+              "type": "literal",
+              "value": "$alias@$domain"
+            }
+          ],
+          "name": "Discard emails at $alias.",
+          "priority": 0
+        }
+    """.trimIndent()
+    }
+
 
     "https://api.cloudflare.com/client/v4/zones/$zoneId/email/routing/rules"
         .httpPost()
+        .header("Authorization" to "Bearer $APIKey")
+        .header("Content-Type" to "application/json")
+        .body(body)
+        .response {
+                _, response, result ->
+            when (result) {
+                is com.github.kittinunf.result.Result.Failure -> {
+                    val ex = result.getException()
+                    callback("Error: ${ex.message}")
+                }
+                is com.github.kittinunf.result.Result.Success -> {
+                    if (response.statusCode == 200) {
+                        callback("success")
+                    } else {
+                        callback("Error: ${response.statusCode}")
+                    }
+                }
+            }
+        }
 
 }
