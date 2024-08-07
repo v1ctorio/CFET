@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -32,6 +33,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -50,8 +52,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.nosesisaid.cfer.management.api.createEmail
+import com.nosesisaid.cfer.management.api.fetchEmails
+import kotlinx.coroutines.launch
 
 
 enum class ActionType {
@@ -59,9 +65,10 @@ enum class ActionType {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
 fun ManageRoutesScreen(navController: NavController) {
+
+    val context = LocalContext.current
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(
@@ -71,9 +78,19 @@ fun ManageRoutesScreen(navController: NavController) {
     var selectedNewRouteAction by remember { mutableStateOf(ActionType.Forward) }
     var actionTypes = ActionType.entries.toTypedArray()
 
-    var emailsList = mutableListOf<String>("a@example.com", "b@example.com")
+    var emailsList = mutableListOf<String>("")
     var isNewEmailListDropDownExpanded by remember { mutableStateOf(false) }
     var selectedTargetEmailNewRoute by remember { mutableStateOf(emailsList[0]) }
+
+    fetchEmails(1,context) { r ->
+        r?.result?.forEach { e ->
+            if (e.verified != null) {
+                emailsList.remove("")
+                emailsList.add(e.email)
+            }
+        }
+
+    }
 
     var caroutes_is_checked by remember { mutableStateOf(false) }
     Scaffold (
@@ -252,6 +269,11 @@ fun ManageRoutesScreen(navController: NavController) {
                                     )
                                     Text(option.name)
                                 }
+                            }
+                            Button(onClick = {
+                                //TODO
+                            }, modifier = Modifier.fillMaxWidth()) {
+                                Text("Add Target Email")
                             }
 
                         }
