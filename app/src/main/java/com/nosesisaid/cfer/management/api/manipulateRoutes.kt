@@ -1,7 +1,9 @@
 package com.nosesisaid.cfer.management.api
 
 import android.content.Context
+import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.httpPut
+import com.nosesisaid.cfer.management.ActionType
 
 fun updateCatchAllRule(targetEmail: String, enabled:Boolean, context: Context, callback: (String)->Unit){
     val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
@@ -36,4 +38,46 @@ fun updateCatchAllRule(targetEmail: String, enabled:Boolean, context: Context, c
                 }
             }
         }
+}
+
+fun addRoute(actionType: ActionType, alias:String,targetEmail: String,context: Context,callback: (String) -> Unit){
+
+    val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
+    val APIKey = sharedPref.getString("APIKey", "")
+    val userId = sharedPref.getString("userId", "")
+    val zoneId = sharedPref.getString("zoneId", "")
+    if (APIKey == "" || userId == "" || zoneId == "") {
+        callback("You must log in first")
+        return
+    }
+
+    val enabled = "true"
+    val action = actionType.name.lowercase()
+
+    val body = """
+        {
+          "actions": [
+            {
+              "type": "$action",
+              "value": [
+                "$targetEmail"
+              ]
+            }
+          ],
+          "enabled": $enabled,
+          "matchers": [
+            {
+              "field": "to",
+              "type": "literal",
+              "value": "$alias@example.com"
+            }
+          ],
+          "name": "Send to $targetEmail rule.",
+          "priority": 0
+        }
+    """.trimIndent()
+
+    "https://api.cloudflare.com/client/v4/zones/$zoneId/email/routing/rules"
+        .httpPost()
+
 }

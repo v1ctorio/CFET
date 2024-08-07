@@ -172,8 +172,8 @@ fun ManageRoutesScreen(navController: NavController) {
                                 }
                             },
                             modifier = Modifier
-                            .scale(0.7f)
-                            .padding(10.dp))
+                                .scale(0.7f)
+                                .padding(10.dp))
                     }
                 }
                 Card(
@@ -185,7 +185,9 @@ fun ManageRoutesScreen(navController: NavController) {
                     ExposedDropdownMenuBox(
                         expanded = isCatchAllDropdownExpanded,
                         onExpandedChange = { isCatchAllDropdownExpanded = !isCatchAllDropdownExpanded },
-                        modifier = Modifier.fillMaxWidth().padding(12.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
                     ) {
                         OutlinedTextField(
                             readOnly = true,
@@ -299,7 +301,7 @@ fun ManageRoutesScreen(navController: NavController) {
                 if (showBottomSheet) {
                     ModalBottomSheet(sheetState = sheetState, modifier = Modifier.fillMaxHeight(), onDismissRequest = { showBottomSheet = false }) {
                         Column(
-                            modifier = Modifier.padding(32.dp)
+                            modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)
                         ) {
                             Text("Create a new route rule", style = MaterialTheme.typography.titleLarge)
                             Spacer(modifier = Modifier.height(16.dp))
@@ -357,6 +359,7 @@ fun ManageRoutesScreen(navController: NavController) {
                             }, modifier = Modifier.fillMaxWidth()) {
                                 Text("Add Target Email")
                             }
+                            Spacer(modifier =Modifier.height(16.dp))
 
                         }
                     }
