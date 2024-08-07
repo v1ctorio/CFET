@@ -62,17 +62,16 @@ public fun SingInScreen(navController: NavController) {
 
     val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
 
-    if (sharedPref.contains("zoneId") && sharedPref.contains("APIKey") && sharedPref.contains("userId")) {
+    if (sharedPref.contains("zoneId") && sharedPref.contains("APIKey") && sharedPref.contains("userId") && sharedPref.contains("domain")) {
         navController.navigate("manageEmails")
     }
 
 
-    val API_KEY_GENERATOR_ENDPOINT = "https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%5B%7B%22key%22%3A%22email_routing_address%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22email_routing_rule%22%2C%22type%22%3A%22edit%22%7D%5D&name=CFEMTtoken&accountId=*&zoneId=all";
+    val API_KEY_GENERATOR_ENDPOINT = "https://dash.cloudflare.com/profile/api-tokens?permissionGroupKeys=%5B%7B%22key%22%3A%22email_routing_address%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22email_routing_rule%22%2C%22type%22%3A%22edit%22%7D%2C%7B%22key%22%3A%22zone%22%2C%22type%22%3A%22read%22%7D%5D&name=CFETToken&accountId=*&zoneId=all";
     val uriHandler = LocalUriHandler.current
 
     var zoneId by remember { mutableStateOf("") }
     var APIKey by remember { mutableStateOf("") }
-    var userId by remember { mutableStateOf("") }
 
     var errorMessage by remember { mutableStateOf("") }
 
@@ -149,21 +148,11 @@ public fun SingInScreen(navController: NavController) {
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii)
                 )
-                OutlinedTextField(
-                    value = userId,
-                    label={
-                        Text("User ID")
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(fontFamily = FontFamily.Monospace),
-                    onValueChange ={
-                        userId = it
-                    }
-                )
+
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(onClick = {
 
-                    saveLogInData(zoneId, APIKey, userId, context) { result ->
+                    saveLogInData(zoneId, APIKey, context) { result ->
                         if (result == "success") {
                             navController.navigate("manageEmails")
                         } else {
