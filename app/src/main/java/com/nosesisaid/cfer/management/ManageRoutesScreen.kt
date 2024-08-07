@@ -62,7 +62,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.management.api.createEmail
-import com.nosesisaid.cfer.management.api.disableEnableCatchAllRoute
 import com.nosesisaid.cfer.management.api.fetchEmails
 import com.nosesisaid.cfer.management.api.fetchRoutes
 import com.nosesisaid.cfer.management.api.updateCatchAllRule
@@ -166,7 +165,7 @@ fun ManageRoutesScreen(navController: NavController) {
                         Switch(checked = caroutes_is_checked,
                             onCheckedChange = {
                                 caroutes_is_checked = it
-                                disableEnableCatchAllRoute(it, context) {
+                                updateCatchAllRule(catchAllRouteEmail,it, context) {
                                     scope.launch {
                                         snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
                                     }
@@ -208,7 +207,7 @@ fun ManageRoutesScreen(navController: NavController) {
                                     onClick = {
                                         isCatchAllDropdownExpanded = false
                                         catchAllRouteEmail = option
-                                            updateCatchAllRule(option, context) {
+                                            updateCatchAllRule(option,caroutes_is_checked, context) {
                                                 scope.launch {
                                                     snackbarHostState.showSnackbar("Catch-all route updated", duration = SnackbarDuration.Short)
                                                 }
