@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +37,8 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -49,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.scale
@@ -56,8 +62,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.management.api.createEmail
+import com.nosesisaid.cfer.management.api.disableEnableCatchAllRoute
 import com.nosesisaid.cfer.management.api.fetchEmails
 import com.nosesisaid.cfer.management.api.fetchRoutes
+import com.nosesisaid.cfer.management.api.updateCatchAllRule
 import kotlinx.coroutines.launch
 
 
@@ -70,6 +78,8 @@ enum class ActionType {
 fun ManageRoutesScreen(navController: NavController) {
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(
@@ -94,18 +104,26 @@ fun ManageRoutesScreen(navController: NavController) {
     }
 
     var catchAllRouteEmail by remember { mutableStateOf("") }
+    var isCatchAllDropdownExpanded by remember { mutableStateOf(false) }
+
+    var caroutes_is_checked by remember { mutableStateOf(false) }
 
     fetchRoutes(1,context) { r ->
         println(r?.result)
         r?.result?.forEach(){e->
             if (e.matchers[0].type == "all") {
                 catchAllRouteEmail = e.actions[0].value[0]
+                caroutes_is_checked = e.enabled
             }
         }
     }
 
-    var caroutes_is_checked by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold (
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState,
+            modifier = Modifier.padding(
+                WindowInsets.ime.asPaddingValues()),) },
         topBar = { TopAppBar(
             title = { Text(text = "Routes") },
             colors = topAppBarColors(
@@ -145,7 +163,16 @@ fun ManageRoutesScreen(navController: NavController) {
                     ){
                         Text(text = "Catch-all route", modifier = Modifier.padding(20.dp))
                         Spacer(modifier = Modifier.weight(1f))
-                        Switch(checked = caroutes_is_checked, onCheckedChange = { caroutes_is_checked = it }, modifier = Modifier
+                        Switch(checked = caroutes_is_checked,
+                            onCheckedChange = {
+                                caroutes_is_checked = it
+                                disableEnableCatchAllRoute(it, context) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                    }
+                                }
+                            },
+                            modifier = Modifier
                             .scale(0.7f)
                             .padding(10.dp))
                     }
@@ -154,9 +181,45 @@ fun ManageRoutesScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 10.dp), colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                     )) {
-                    Text(text = catchAllRouteEmail, modifier = Modifier.padding(20.dp))
+                    ExposedDropdownMenuBox(
+                        expanded = isCatchAllDropdownExpanded,
+                        onExpandedChange = { isCatchAllDropdownExpanded = !isCatchAllDropdownExpanded },
+                        modifier = Modifier.fillMaxWidth().padding(12.dp)
+                    ) {
+                        OutlinedTextField(
+                            readOnly = true,
+                            value = catchAllRouteEmail,
+                            onValueChange = {},
+                            label = { Text(text = "Target") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCatchAllDropdownExpanded)
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(),
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(expanded = isCatchAllDropdownExpanded, onDismissRequest = { isCatchAllDropdownExpanded = false }) {
+                            emailsList.forEach { option: String ->
+                                DropdownMenuItem(
+                                    text = { Text(text = option) },
+                                    onClick = {
+                                        isCatchAllDropdownExpanded = false
+                                        catchAllRouteEmail = option
+                                            updateCatchAllRule(option, context) {
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar("Catch-all route updated", duration = SnackbarDuration.Short)
+                                                }
+                                            }
+
+                                    }
+                                )
+                            }
+                        }
+
+                    }
                 }
 
                 Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
