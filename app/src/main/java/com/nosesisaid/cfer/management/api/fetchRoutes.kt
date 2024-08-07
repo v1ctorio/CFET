@@ -69,6 +69,7 @@ fun fetchRoutes(page: Int, context: Context, callback: (listRoutesResponse?) -> 
                         val jsonObject = Gson().fromJson(data, JsonObject::class.java)
                         val routeListResponse =
                             Gson().fromJson(jsonObject, listRoutesResponse::class.java)
+                        println(routeListResponse)
                         callback(routeListResponse)
                     }
                 }

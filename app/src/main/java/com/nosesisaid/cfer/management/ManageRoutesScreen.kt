@@ -21,12 +21,16 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -49,16 +53,27 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
+
+enum class ActionType {
+    Forward, Drop, Worker
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun ManageRoutesScreen(navController: NavController) {
-    val possibleActions = listOf("Forward", "Worker", "Discard")
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
     )
+
+    var selectedNewRouteAction by remember { mutableStateOf(ActionType.Forward) }
+    var actionTypes = ActionType.entries.toTypedArray()
+
+    var emailsList = mutableListOf<String>("a@example.com", "b@example.com")
+    var isNewEmailListDropDownExpanded by remember { mutableStateOf(false) }
+    var selectedTargetEmailNewRoute by remember { mutableStateOf(emailsList[0]) }
 
     var caroutes_is_checked by remember { mutableStateOf(false) }
     Scaffold (
@@ -189,13 +204,55 @@ fun ManageRoutesScreen(navController: NavController) {
                         ) {
                             Text("Create a new route rule", style = MaterialTheme.typography.titleLarge)
                             Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedTextField(value = "", onValueChange = {  }, label = { Text("Alias@example.com") }, modifier = Modifier.fillMaxWidth())
-                            DropdownMenu(expanded = true, modifier = Modifier.fillMaxWidth(),onDismissRequest = { /*TODO*/ }) {
-                                possibleActions.forEach { action ->
-                                    DropdownMenuItem(text = { Text(action) }, onClick = { /*TODO*/ })
+                            OutlinedTextField(value = "", onValueChange = {  }, label = { Text("Alias") }, modifier = Modifier.fillMaxWidth())
+                            ExposedDropdownMenuBox(
+                                expanded = isNewEmailListDropDownExpanded,
+                                onExpandedChange = { isNewEmailListDropDownExpanded = !isNewEmailListDropDownExpanded },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                OutlinedTextField(
+                                    readOnly = true,
+                                    value = selectedTargetEmailNewRoute,
+                                    onValueChange = {},
+                                    label = { Text(text = "Target") },
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isNewEmailListDropDownExpanded)
+                                    },
+                                    colors = OutlinedTextFieldDefaults.colors(),
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth()
+                                )
+                                ExposedDropdownMenu(expanded = isNewEmailListDropDownExpanded, onDismissRequest = { isNewEmailListDropDownExpanded = false }) {
+                                    emailsList.forEach { option: String ->
+                                        DropdownMenuItem(
+                                            text = { Text(text = option) },
+                                            onClick = {
+                                                isNewEmailListDropDownExpanded = false
+                                                selectedTargetEmailNewRoute = option
+                                            }
+                                        )
+                                    }
+                                }
+
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            actionTypes.forEach { option ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                )
+                                {
+                                    RadioButton(
+                                        selected = selectedNewRouteAction == option,
+
+                                        onClick = {
+                                            selectedNewRouteAction = option
+                                        }
+                                    )
+                                    Text(option.name)
                                 }
                             }
-                            OutlinedTextField(value = "", onValueChange = {  }, label = { Text("Alias") }, modifier = Modifier.fillMaxWidth())
 
                         }
                     }
