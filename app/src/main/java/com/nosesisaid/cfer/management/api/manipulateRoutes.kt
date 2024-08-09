@@ -144,13 +144,40 @@ fun updateRouteState(enabled: Boolean,route: route,context: Context,callback: (S
         return
     }
 
+    val isVoidRoute = route.actions[0].value.isEmpty()
     val enabledString = if (enabled) "true" else "false"
+    var body:String
+
+    if (!isVoidRoute) {
+       body = "{\"actions\":[{\"type\":\"${route.actions[0].type}\",\"value\":[\"${route.actions[0].value[0]}\"]}],\"enabled\":$enabledString,\"matchers\":[{\"field\":\"to\",\"type\":\"literal\",\"value\":\"${route.matchers[0].value}\"}],\"name\":\"${route.name}\",\"priority\":0}"
+    } else {
+        body = """
+        {
+          "actions": [
+            {
+              "type": "drop",
+              "value": []
+            }
+          ],
+          "enabled": $enabledString,
+          "matchers": [
+            {
+              "field": "to",
+              "type": "literal",
+              "value": "${route.matchers[0].value}"
+            }
+          ],
+          "name": "Discard emails at ${route.matchers[0].value}.",
+          "priority": 0
+        }
+    """.trimIndent()
+    }
 
     "https://api.cloudflare.com/client/v4/zones/$zoneId/email/routing/rules/${route.id}"
         .httpPut()
         .header("Authorization" to "Bearer $APIKey")
         .header("Content-Type" to "application/json")
-        .body("{\"actions\":[{\"type\":\"${route.actions[0].type}\",\"value\":[\"${route.actions[0].value[0]}\"]}],\"enabled\":$enabledString,\"matchers\":[{\"field\":\"to\",\"type\":\"literal\",\"value\":\"${route.matchers[0].value}\"}],\"name\":\"${route.name}\",\"priority\":0}")
+        .body(body)
         .response { _, response, result ->
             when (result) {
                 is com.github.kittinunf.result.Result.Failure -> {

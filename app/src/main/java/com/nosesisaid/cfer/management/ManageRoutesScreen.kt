@@ -295,13 +295,13 @@ fun ManageRoutesScreen(navController: NavController) {
 
                                         Text(r.matchers[0].value.dropLast(domain.length+1),
                                             Modifier
-                                                .width(65.dp), maxLines = 1)
+                                                .width(85.dp), maxLines = 1)
                                         Text(text = "to",
                                             Modifier.padding(horizontal = 12.dp),
                                             fontStyle = FontStyle.Italic,
                                             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                                         )
-                                        Text(r.actions[0].value[0],modifier= Modifier.width(170.dp), maxLines = 1)
+                                        Text(r.actions[0].value[0],modifier= Modifier.width(150.dp), maxLines = 1)
                                         Switch(checked = enabledStates[r.id] ?: false, onCheckedChange = { a->
 
                                             enabledStates = enabledStates.toMutableMap().apply {
@@ -341,7 +341,60 @@ fun ManageRoutesScreen(navController: NavController) {
 
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.CenterHorizontally))
+                } else {
+                    LazyColumn(
+                        content = {
+                            items(dropRules) { r ->
+                                ElevatedCard(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 10.dp),
+                                    shape = RoundedCornerShape(20.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(16.dp)
+                                    ) {
 
+                                        Text(r.matchers[0].value.dropLast(domain.length+1),
+                                            Modifier
+                                                .width(85.dp), maxLines = 1)
+                                        Text(text = "to",
+                                            Modifier.padding(horizontal = 12.dp),
+                                            fontStyle = FontStyle.Italic,
+                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                                        )
+                                        Icon(painter = painterResource(id = R.drawable.baseline_block_24), contentDescription = "Email gets blocked")
+                                        //Spacer(modifier = Modifier.weight(1f))
+                                        Spacer(modifier = Modifier.width(126.dp))
+
+                                        Switch(checked = enabledStates[r.id] ?: false, onCheckedChange = { a->
+
+                                            enabledStates = enabledStates.toMutableMap().apply {
+                                                this[r.id] = a
+                                            }
+                                            updateRouteState(a,r,context) {
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                                }
+                                            }
+
+                                        }, modifier = Modifier.scale(0.6f))
+                                        IconButton(onClick = {
+                                            routeToBeDeleted = r
+                                        }) {
+                                            Icon(painter = painterResource(id = R.drawable.baseline_delete_forever_24), contentDescription = "Delete rule")
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                    )
+                }
 
                 if (showBottomSheet) {
                     ModalBottomSheet(sheetState = sheetState, modifier = Modifier.fillMaxHeight(), onDismissRequest = { showBottomSheet = false }) {
