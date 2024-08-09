@@ -1,8 +1,7 @@
 name: AndroidCI build release
 
 on:
-  pull_request_target:
-    branches: [ master ]
+  push
 
 jobs:
   builds:
