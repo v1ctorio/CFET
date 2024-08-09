@@ -133,3 +133,36 @@ fun addRoute(actionType: ActionType, alias:String,targetEmail: String?,context: 
         }
 
 }
+fun updateRouteState(enabled: Boolean,route: route,context: Context,callback: (String) -> Unit){
+    val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
+    val APIKey = sharedPref.getString("APIKey", "")
+    val userId = sharedPref.getString("userId", "")
+    val zoneId = sharedPref.getString("zoneId", "")
+    if (APIKey == "" || userId == "" || zoneId == "") {
+        callback("You must log in first")
+        return
+    }
+
+    val enabledString = if (enabled) "true" else "false"
+
+    "https://api.cloudflare.com/client/v4/zones/$zoneId/email/routing/rules/${route.id}"
+        .httpPut()
+        .header("Authorization" to "Bearer $APIKey")
+        .header("Content-Type" to "application/json")
+        .body("{\"actions\":[{\"type\":\"${route.actions[0].type}\",\"value\":[\"${route.actions[0].value[0]}\"]}],\"enabled\":$enabledString,\"matchers\":[{\"field\":\"to\",\"type\":\"literal\",\"value\":\"${route.matchers[0].value}\"}],\"name\":\"${route.name}\",\"priority\":0}")
+        .response { _, response, result ->
+            when (result) {
+                is com.github.kittinunf.result.Result.Failure -> {
+                    val ex = result.getException()
+                    callback("Error: ${ex.message}")
+                }
+                is com.github.kittinunf.result.Result.Success -> {
+                    if (response.statusCode == 200) {
+                        callback("success")
+                    } else {
+                        callback("Error: ${response.statusCode}")
+                    }
+                }
+            }
+        }
+}

@@ -30,6 +30,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -57,12 +58,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.navigation.NavController
+import com.nosesisaid.cfer.R
 import com.nosesisaid.cfer.management.api.addRoute
 import com.nosesisaid.cfer.management.api.fetchEmails
 import com.nosesisaid.cfer.management.api.fetchRoutes
 import com.nosesisaid.cfer.management.api.route
 import com.nosesisaid.cfer.management.api.updateCatchAllRule
+import com.nosesisaid.cfer.management.api.updateRouteState
 import com.nosesisaid.cfer.ui.theme.Typography
 import kotlinx.coroutines.launch
 
@@ -107,6 +112,10 @@ fun ManageRoutesScreen(navController: NavController) {
     var forwardRules by remember  { mutableStateOf(emptyList<route>())}
     var dropRules by remember  { mutableStateOf(emptyList<route>())}
 
+    var enabledStates by remember { mutableStateOf(mutableMapOf<String, Boolean>()) }
+
+    var stateVersion by remember { mutableStateOf(0) }
+
     LaunchedEffect(Unit) {
         fetchEmails(1, context) { r ->
             r?.result?.forEach { e ->
@@ -130,9 +139,11 @@ fun ManageRoutesScreen(navController: NavController) {
                     }
                     e.actions[0].type == "forward" -> {
                         forwardRules = forwardRules + e
+                        enabledStates[e.id] = e.enabled
                     }
                     e.actions[0].type == "drop" -> {
                         dropRules = dropRules + e
+                        enabledStates[e.id] = e.enabled
                     }
                 }
             }
@@ -283,12 +294,28 @@ fun ManageRoutesScreen(navController: NavController) {
 
                                         Text(r.matchers[0].value.dropLast(domain.length+1),
                                             Modifier
-                                                .width(75.dp), maxLines = 1)
+                                                .width(65.dp), maxLines = 1)
                                         Text(text = "to",
-                                            Modifier.padding(horizontal = 12.dp)
+                                            Modifier.padding(horizontal = 12.dp),
+                                            fontStyle = FontStyle.Italic,
+                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                                         )
-                                        Text(r.actions[0].value[0],modifier= Modifier
-                                        )
+                                        Text(r.actions[0].value[0],modifier= Modifier.width(170.dp), maxLines = 1)
+                                        Switch(checked = enabledStates[r.id] ?: false, onCheckedChange = { a->
+
+                                            enabledStates = enabledStates.toMutableMap().apply {
+                                                this[r.id] = a
+                                            }
+                                            updateRouteState(a,r,context) {
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                                }
+                                            }
+
+                                        }, modifier = Modifier.scale(0.6f))
+                                        IconButton(onClick = { /*TODO*/ }) {
+                                            Icon(painter = painterResource(id = R.drawable.baseline_delete_forever_24), contentDescription = "Delete rule")
+                                        }
                                     }
                                 }
 

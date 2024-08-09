@@ -20,8 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.sharp.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -55,9 +53,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
+import com.nosesisaid.cfer.R
 import com.nosesisaid.cfer.management.api.CloudflareError
 import com.nosesisaid.cfer.management.api.CloudflareMessage
 import com.nosesisaid.cfer.management.api.createEmail
@@ -224,7 +224,9 @@ topBar = { TopAppBar(
                                         if (email.verified != null) {
                                             ClickableText(
                                                 text = AnnotatedString("Verified"),
-                                                modifier = Modifier.padding(16.dp).width(80.dp),
+                                                modifier = Modifier
+                                                    .padding(16.dp)
+                                                    .width(80.dp),
                                                 maxLines = 1,
                                                 onClick = {
                                                     scope.launch {
@@ -239,7 +241,9 @@ topBar = { TopAppBar(
 
                                         } else {
                                             ClickableText(text = AnnotatedString("Pending"),
-                                                modifier = Modifier.padding(16.dp).width(80.dp),
+                                                modifier = Modifier
+                                                    .padding(16.dp)
+                                                    .width(80.dp),
                                                 maxLines = 1,
                                                 onClick = {
                                                     scope.launch {
@@ -254,9 +258,9 @@ topBar = { TopAppBar(
 
                                         IconButton(onClick = {
                                             openDialogIdOfThing.value = email
-                                        }, modifier = Modifier.fillMaxWidth()) {
+                                        }, modifier = Modifier.fillMaxWidth().padding(end = 16.dp)) {
                                             Icon(
-                                                imageVector = Icons.Filled.Clear,
+                                                painter = painterResource(id = R.drawable.baseline_delete_forever_24),
                                                 contentDescription = "Delete"
                                             )
                                         }
@@ -356,7 +360,7 @@ fun WarningEmailDeletion(
 ) {
     AlertDialog(
         icon = {
-            Icon(Icons.Sharp.Delete, contentDescription = "Delete icon")
+            Icon(painter = painterResource(id = R.drawable.baseline_delete_forever_24), contentDescription = "Delete icon")
         },
         title = {
             Text(text = "Are you sure you want to delete this email?")
