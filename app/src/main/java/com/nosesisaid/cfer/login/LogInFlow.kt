@@ -52,10 +52,10 @@ fun saveLogInData(zoneId: String, APIKey: String, context: Context, callback: (S
                 putString("userId", accountId)
                 apply()
             }
+            callback("success")
         }
 
 
-        callback("success")
     }
 }
 
