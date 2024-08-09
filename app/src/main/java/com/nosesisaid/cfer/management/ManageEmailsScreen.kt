@@ -38,11 +38,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,11 +48,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.R
 import com.nosesisaid.cfer.management.api.CloudflareError
@@ -120,38 +120,46 @@ fun ManageEmailsScreen(navController: NavController) {
 
     val openDialogIdOfThing = remember { mutableStateOf<email?>(null) }
 
-    Scaffold (
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState,
-            modifier = Modifier.padding(
-                WindowInsets.ime.asPaddingValues()),)
-    },
-
-topBar = { TopAppBar(
-    title = { Text(text = "Emails") },
-    colors = topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        titleContentColor = MaterialTheme.colorScheme.primary
-    ),
-    actions = {
-        IconButton(onClick = { uriHandler.openUri("https://github.com/v1ctorio/cloudlfare-email-manager") }) {
-            Icon(
-                painter = painterResource(id = R.drawable.baseline_code_24),
-                contentDescription = "source code"
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(
+                    WindowInsets.ime.asPaddingValues()
+                ),
             )
+        },
 
-        }
-    }
-)},
-        bottomBar = { CFERNavigationBar(
-            isEmailsSelected = true,
-            nav = navController
-        ) },
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Emails") },
+                colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                ),
+                actions = {
+                    IconButton(onClick = { uriHandler.openUri("https://github.com/v1ctorio/cloudlfare-email-manager") }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_code_24),
+                            contentDescription = "source code"
+                        )
+
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            CFERNavigationBar(
+                isEmailsSelected = true,
+                nav = navController
+            )
+        },
         floatingActionButton = {
 
-                               FloatingActionButton(onClick = { showBottomSheet = true }) {
-                                       Icon(imageVector = Icons.Filled.Add, contentDescription = "Add email")
+            FloatingActionButton(onClick = { showBottomSheet = true }) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add email")
 
-                                   }
+            }
 
 
         }
@@ -255,11 +263,13 @@ topBar = { TopAppBar(
                                             )
                                         }
 
-                                        IconButton(onClick = {
-                                            openDialogIdOfThing.value = email
-                                        }, modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(end = 16.dp)) {
+                                        IconButton(
+                                            onClick = {
+                                                openDialogIdOfThing.value = email
+                                            }, modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(end = 16.dp)
+                                        ) {
                                             Icon(
                                                 painter = painterResource(id = R.drawable.baseline_delete_forever_24),
                                                 contentDescription = "Delete"
@@ -287,7 +297,7 @@ topBar = { TopAppBar(
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            openDialogIdOfThing.value = null
+                                openDialogIdOfThing.value = null
                             }
                         },
                         target = openDialogIdOfThing.value!!.email,

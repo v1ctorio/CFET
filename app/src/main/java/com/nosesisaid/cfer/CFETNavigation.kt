@@ -14,10 +14,10 @@ fun CFETNavigation(
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
-            SingInScreen(navController =navController)
+            SingInScreen(navController = navController)
         }
         composable("manageEmails") {
-            ManageEmailsScreen(navController =navController)
+            ManageEmailsScreen(navController = navController)
         }
         composable("manageRoutes") {
             ManageRoutesScreen(navController = navController)

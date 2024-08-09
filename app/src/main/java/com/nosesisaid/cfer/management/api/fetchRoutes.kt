@@ -22,7 +22,8 @@ data class route(
     val priority: Int,
     val tag: String
 )
-data class action (
+
+data class action(
     val type: String,
     val value: List<String>
 )

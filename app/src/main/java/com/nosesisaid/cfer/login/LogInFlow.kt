@@ -2,7 +2,6 @@ package com.nosesisaid.cfer.login
 
 import android.content.Context
 import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.fuel.gson.responseObject
 import com.github.kittinunf.result.Result
 import com.google.gson.Gson
 
@@ -14,19 +13,19 @@ data class ResultTokenValidationResponse(
 data class TokenValidationResponse(
     val success: Boolean,
     val errors: List<String>,
-  //  val messages: List<String>,
+    //  val messages: List<String>,
     val result: ResultTokenValidationResponse
 )
 
 
-
-class TokenValidationResponseDeserializer : com.github.kittinunf.fuel.core.ResponseDeserializable<TokenValidationResponse> {
+class TokenValidationResponseDeserializer :
+    com.github.kittinunf.fuel.core.ResponseDeserializable<TokenValidationResponse> {
     override fun deserialize(content: String): TokenValidationResponse =
         Gson().fromJson(content, TokenValidationResponse::class.java)
 }
 
 fun saveLogInData(zoneId: String, APIKey: String, context: Context, callback: (String) -> Unit) {
-    if (zoneId.isEmpty() || APIKey.isEmpty() ) {
+    if (zoneId.isEmpty() || APIKey.isEmpty()) {
         callback("You must fill both fields")
         return
     }
@@ -43,7 +42,7 @@ fun saveLogInData(zoneId: String, APIKey: String, context: Context, callback: (S
             apply()
         }
 
-        additionalLogInStuff(APIKey,zoneId){ domain, accountId ->
+        additionalLogInStuff(APIKey, zoneId) { domain, accountId ->
             if (domain == null || accountId == null) {
                 callback("Error fetching and account id")
                 return@additionalLogInStuff
@@ -71,6 +70,7 @@ fun validateToken(token: String, callback: (Boolean) -> Unit) {
                     println("Error: ${ex.message}")
                     callback(false)
                 }
+
                 is Result.Success -> {
                     val response = result.get()
                     println("Token validation success: ${response.success}")
@@ -80,12 +80,13 @@ fun validateToken(token: String, callback: (Boolean) -> Unit) {
         }
 }
 
-class zoneRequestResponseDeserialize : com.github.kittinunf.fuel.core.ResponseDeserializable<zoneRequestResponse> {
+class zoneRequestResponseDeserialize :
+    com.github.kittinunf.fuel.core.ResponseDeserializable<zoneRequestResponse> {
     override fun deserialize(content: String): zoneRequestResponse =
         Gson().fromJson(content, zoneRequestResponse::class.java)
 }
 
-fun additionalLogInStuff(token:String,zoneId:String, callback: (String?, String?) -> Unit){
+fun additionalLogInStuff(token: String, zoneId: String, callback: (String?, String?) -> Unit) {
     "https://api.cloudflare.com/client/v4/zones/$zoneId"
         .httpGet()
         .header("Authorization" to "Bearer $token")
@@ -96,6 +97,7 @@ fun additionalLogInStuff(token:String,zoneId:String, callback: (String?, String?
                     println("Error: ${ex.message}")
                     callback(null, null)
                 }
+
                 is Result.Success -> {
                     val response = result.get()
                     callback(response.result.name, response.result.account.id) //DOMAIN, ACCOUNT ID
@@ -104,16 +106,17 @@ fun additionalLogInStuff(token:String,zoneId:String, callback: (String?, String?
         }
 }
 
-data class zoneRequestResponse (
+data class zoneRequestResponse(
     val result: CloudflareZoneData
 )
-data class CloudflareZoneData (
+
+data class CloudflareZoneData(
     val id: String,
     val name: String,
     val account: CloudflareAccountData
 )
 
-data class CloudflareAccountData (
+data class CloudflareAccountData(
     val id: String,
     val name: String
 )

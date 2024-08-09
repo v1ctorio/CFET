@@ -25,10 +25,13 @@ fun WarningElementDeletion(
 ) {
     AlertDialog(
         icon = {
-            Icon(painter = painterResource(id = R.drawable.baseline_delete_forever_24), contentDescription = "Delete icon")
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_delete_forever_24),
+                contentDescription = "Delete icon"
+            )
         },
         title = {
-            Text(text = if(isEmail)"Are you sure you want to delete this email?" else "Are you sure you want to delete this route?")
+            Text(text = if (isEmail) "Are you sure you want to delete this email?" else "Are you sure you want to delete this route?")
         },
         text = {
             Text(text = buildAnnotatedString {

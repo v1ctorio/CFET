@@ -4,7 +4,7 @@ import android.content.Context
 import com.github.kittinunf.fuel.httpDelete
 import com.github.kittinunf.fuel.httpPost
 
-fun deleteEmail(target_email_id:String,context: Context,callback: (String) -> Unit){
+fun deleteEmail(target_email_id: String, context: Context, callback: (String) -> Unit) {
     val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
     val APIKey = sharedPref.getString("APIKey", "")
     val userId = sharedPref.getString("userId", "")
@@ -21,6 +21,7 @@ fun deleteEmail(target_email_id:String,context: Context,callback: (String) -> Un
                     val ex = result.getException()
                     callback("Error: ${ex.message}")
                 }
+
                 is com.github.kittinunf.result.Result.Success -> {
                     if (response.statusCode == 200) {
                         callback("success")
@@ -32,7 +33,7 @@ fun deleteEmail(target_email_id:String,context: Context,callback: (String) -> Un
         }
 }
 
-fun createEmail(address:String,context: Context,callback: (String) -> Unit){
+fun createEmail(address: String, context: Context, callback: (String) -> Unit) {
     val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
     val APIKey = sharedPref.getString("APIKey", "")
     val userId = sharedPref.getString("userId", "")
@@ -52,13 +53,13 @@ fun createEmail(address:String,context: Context,callback: (String) -> Unit){
         .header("Authorization" to "Bearer $APIKey")
         .header("Content-Type" to "application/json")
         .body("{\"email\":\"$address\"}")
-        .response {
-            _, response, result ->
+        .response { _, response, result ->
             when (result) {
                 is com.github.kittinunf.result.Result.Failure -> {
                     val ex = result.getException()
                     callback("Error: ${ex.message}")
                 }
+
                 is com.github.kittinunf.result.Result.Success -> {
                     if (response.statusCode == 200) {
                         callback("success")

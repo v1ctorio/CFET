@@ -43,23 +43,23 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.R
 import com.nosesisaid.cfer.login.logOut
@@ -87,8 +87,8 @@ fun ManageRoutesScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
 
 
-
-    val domain = LocalContext.current.getSharedPreferences("cfer", Context.MODE_PRIVATE).getString("domain", "") ?: ""
+    val domain = LocalContext.current.getSharedPreferences("cfer", Context.MODE_PRIVATE)
+        .getString("domain", "") ?: ""
 
     var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(
@@ -105,14 +105,13 @@ fun ManageRoutesScreen(navController: NavController) {
     var selectedTargetEmailNewRoute by remember { mutableStateOf(emailsList[0]) }
 
 
-
     var catchAllRouteEmail by remember { mutableStateOf("") }
     var isCatchAllDropdownExpanded by remember { mutableStateOf(false) }
 
     var caroutesIsChecked by remember { mutableStateOf(false) }
 
-    var forwardRules by remember  { mutableStateOf(emptyList<route>())}
-    var dropRules by remember  { mutableStateOf(emptyList<route>())}
+    var forwardRules by remember { mutableStateOf(emptyList<route>()) }
+    var dropRules by remember { mutableStateOf(emptyList<route>()) }
 
     var enabledStates by remember { mutableStateOf(mutableMapOf<String, Boolean>()) }
 
@@ -139,10 +138,12 @@ fun ManageRoutesScreen(navController: NavController) {
                         catchAllRouteEmail = e.actions[0].value[0]
                         caroutesIsChecked = e.enabled
                     }
+
                     e.actions[0].type == "forward" -> {
                         forwardRules = forwardRules + e
                         enabledStates[e.id] = e.enabled
                     }
+
                     e.actions[0].type == "drop" -> {
                         dropRules = dropRules + e
                         enabledStates[e.id] = e.enabled
@@ -157,29 +158,42 @@ fun ManageRoutesScreen(navController: NavController) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     var newRuleAlias by remember { mutableStateOf("") }
-    Scaffold (
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState,
-            modifier = Modifier.padding(
-                WindowInsets.ime.asPaddingValues()),) },
-        topBar = { TopAppBar(
-            title = { Text(text = "Routes") },
-            colors = topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                titleContentColor = MaterialTheme.colorScheme.primary
-            ),
-            actions = {
-                IconButton(onClick = { logOut(context) {
-                    navController.navigate("login")
-                } }) {
-                    Icon(painter = painterResource(id = R.drawable.baseline_logout_24), contentDescription = "Log out from CFET")
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(
+                    WindowInsets.ime.asPaddingValues()
+                ),
+            )
+        },
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Routes") },
+                colors = topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                ),
+                actions = {
+                    IconButton(onClick = {
+                        logOut(context) {
+                            navController.navigate("login")
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.baseline_logout_24),
+                            contentDescription = "Log out from CFET"
+                        )
+                    }
                 }
-            }
-        )
-                 },
-        bottomBar = { CFERNavigationBar(
-            isEmailsSelected = false,
-            nav = navController
-        ) },
+            )
+        },
+        bottomBar = {
+            CFERNavigationBar(
+                isEmailsSelected = false,
+                nav = navController
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showBottomSheet = true }) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add email")
@@ -201,26 +215,36 @@ fun ManageRoutesScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(top = 10.dp), colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    )) {
-                    Row (
+                    )
+                ) {
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
-                    ){
-                        Text(text = "Catch-all route", modifier = Modifier.padding(20.dp), style = Typography.titleMedium)
+                    ) {
+                        Text(
+                            text = "Catch-all route",
+                            modifier = Modifier.padding(20.dp),
+                            style = Typography.titleMedium
+                        )
                         Spacer(modifier = Modifier.weight(1f))
-                        Switch(checked = caroutesIsChecked,
+                        Switch(
+                            checked = caroutesIsChecked,
                             onCheckedChange = {
                                 caroutesIsChecked = it
-                                updateCatchAllRule(catchAllRouteEmail,it, context) {
+                                updateCatchAllRule(catchAllRouteEmail, it, context) {
                                     scope.launch {
-                                        snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                        snackbarHostState.showSnackbar(
+                                            it,
+                                            duration = SnackbarDuration.Short
+                                        )
                                     }
                                 }
                             },
                             modifier = Modifier
                                 .scale(0.7f)
-                                .padding(8.dp))
+                                .padding(8.dp)
+                        )
                     }
                 }
                 Card(
@@ -228,10 +252,13 @@ fun ManageRoutesScreen(navController: NavController) {
                         .fillMaxWidth()
                         .padding(vertical = 10.dp), colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    )) {
+                    )
+                ) {
                     ExposedDropdownMenuBox(
                         expanded = isCatchAllDropdownExpanded,
-                        onExpandedChange = { isCatchAllDropdownExpanded = !isCatchAllDropdownExpanded },
+                        onExpandedChange = {
+                            isCatchAllDropdownExpanded = !isCatchAllDropdownExpanded
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp)
@@ -249,18 +276,23 @@ fun ManageRoutesScreen(navController: NavController) {
                                 .menuAnchor()
                                 .fillMaxWidth()
                         )
-                        ExposedDropdownMenu(expanded = isCatchAllDropdownExpanded, onDismissRequest = { isCatchAllDropdownExpanded = false }) {
+                        ExposedDropdownMenu(
+                            expanded = isCatchAllDropdownExpanded,
+                            onDismissRequest = { isCatchAllDropdownExpanded = false }) {
                             emailsList.forEach { option: String ->
                                 DropdownMenuItem(
                                     text = { Text(text = option) },
                                     onClick = {
                                         isCatchAllDropdownExpanded = false
                                         catchAllRouteEmail = option
-                                            updateCatchAllRule(option,caroutesIsChecked, context) {
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar("Catch-all route updated", duration = SnackbarDuration.Short)
-                                                }
+                                        updateCatchAllRule(option, caroutesIsChecked, context) {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    "Catch-all route updated",
+                                                    duration = SnackbarDuration.Short
+                                                )
                                             }
+                                        }
 
                                     }
                                 )
@@ -271,14 +303,16 @@ fun ManageRoutesScreen(navController: NavController) {
                 }
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                )) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    )
+                ) {
 
-                    Row(
-                    ) {
-                        Text("Forward adresses",modifier= Modifier
-                            .padding(16.dp),
+                    Row {
+                        Text(
+                            "Forward adresses", modifier = Modifier
+                                .padding(16.dp),
                             textAlign = TextAlign.Center,
                             style = Typography.titleMedium
                         )
@@ -303,31 +337,48 @@ fun ManageRoutesScreen(navController: NavController) {
                                         modifier = Modifier.padding(16.dp)
                                     ) {
 
-                                        Text(r.matchers[0].value.dropLast(domain.length+1),
+                                        Text(
+                                            r.matchers[0].value.dropLast(domain.length + 1),
                                             Modifier
-                                                .width(85.dp), maxLines = 1)
-                                        Text(text = "to",
+                                                .width(85.dp), maxLines = 1
+                                        )
+                                        Text(
+                                            text = "to",
                                             Modifier.padding(horizontal = 12.dp),
                                             fontStyle = FontStyle.Italic,
                                             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                                         )
-                                        Text(r.actions[0].value[0],modifier= Modifier.width(150.dp), maxLines = 1)
-                                        Switch(checked = enabledStates[r.id] ?: false, onCheckedChange = { a->
+                                        Text(
+                                            r.actions[0].value[0],
+                                            modifier = Modifier.width(150.dp),
+                                            maxLines = 1
+                                        )
+                                        Switch(
+                                            checked = enabledStates[r.id] ?: false,
+                                            onCheckedChange = { a ->
 
-                                            enabledStates = enabledStates.toMutableMap().apply {
-                                                this[r.id] = a
-                                            }
-                                            updateRouteState(a,r,context) {
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                                enabledStates = enabledStates.toMutableMap().apply {
+                                                    this[r.id] = a
                                                 }
-                                            }
+                                                updateRouteState(a, r, context) {
+                                                    scope.launch {
+                                                        snackbarHostState.showSnackbar(
+                                                            it,
+                                                            duration = SnackbarDuration.Short
+                                                        )
+                                                    }
+                                                }
 
-                                        }, modifier = Modifier.scale(0.6f))
+                                            },
+                                            modifier = Modifier.scale(0.6f)
+                                        )
                                         IconButton(onClick = {
                                             routeToBeDeleted = r
                                         }) {
-                                            Icon(painter = painterResource(id = R.drawable.baseline_delete_forever_24), contentDescription = "Delete rule")
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.baseline_delete_forever_24),
+                                                contentDescription = "Delete rule"
+                                            )
                                         }
                                     }
                                 }
@@ -336,15 +387,17 @@ fun ManageRoutesScreen(navController: NavController) {
                         }
                     )
                 }
-                Spacer(modifier =Modifier.height(12.dp))
-                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                )) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    )
+                ) {
 
-                    Row(
-                    ) {
-                        Text("Drop adresses",modifier= Modifier
-                            .padding(16.dp),
+                    Row {
+                        Text(
+                            "Drop adresses", modifier = Modifier
+                                .padding(16.dp),
                             textAlign = TextAlign.Center,
                             style = Typography.titleMedium
                         )
@@ -369,34 +422,50 @@ fun ManageRoutesScreen(navController: NavController) {
                                         modifier = Modifier.padding(16.dp)
                                     ) {
 
-                                        Text(r.matchers[0].value.dropLast(domain.length+1),
+                                        Text(
+                                            r.matchers[0].value.dropLast(domain.length + 1),
                                             Modifier
-                                                .width(85.dp), maxLines = 1)
-                                        Text(text = "to",
+                                                .width(85.dp), maxLines = 1
+                                        )
+                                        Text(
+                                            text = "to",
                                             Modifier.padding(horizontal = 12.dp),
                                             fontStyle = FontStyle.Italic,
                                             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                                         )
-                                        Icon(painter = painterResource(id = R.drawable.baseline_block_24), contentDescription = "Email gets blocked")
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.baseline_block_24),
+                                            contentDescription = "Email gets blocked"
+                                        )
                                         //Spacer(modifier = Modifier.weight(1f))
                                         Spacer(modifier = Modifier.width(126.dp))
 
-                                        Switch(checked = enabledStates[r.id] ?: false, onCheckedChange = { a->
+                                        Switch(
+                                            checked = enabledStates[r.id] ?: false,
+                                            onCheckedChange = { a ->
 
-                                            enabledStates = enabledStates.toMutableMap().apply {
-                                                this[r.id] = a
-                                            }
-                                            updateRouteState(a,r,context) {
-                                                scope.launch {
-                                                    snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                                enabledStates = enabledStates.toMutableMap().apply {
+                                                    this[r.id] = a
                                                 }
-                                            }
+                                                updateRouteState(a, r, context) {
+                                                    scope.launch {
+                                                        snackbarHostState.showSnackbar(
+                                                            it,
+                                                            duration = SnackbarDuration.Short
+                                                        )
+                                                    }
+                                                }
 
-                                        }, modifier = Modifier.scale(0.6f))
+                                            },
+                                            modifier = Modifier.scale(0.6f)
+                                        )
                                         IconButton(onClick = {
                                             routeToBeDeleted = r
                                         }) {
-                                            Icon(painter = painterResource(id = R.drawable.baseline_delete_forever_24), contentDescription = "Delete rule")
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.baseline_delete_forever_24),
+                                                contentDescription = "Delete rule"
+                                            )
                                         }
                                     }
                                 }
@@ -407,16 +476,30 @@ fun ManageRoutesScreen(navController: NavController) {
                 }
 
                 if (showBottomSheet) {
-                    ModalBottomSheet(sheetState = sheetState, modifier = Modifier.fillMaxHeight(), onDismissRequest = { showBottomSheet = false }) {
+                    ModalBottomSheet(
+                        sheetState = sheetState,
+                        modifier = Modifier.fillMaxHeight(),
+                        onDismissRequest = { showBottomSheet = false }) {
                         Column(
                             modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)
                         ) {
-                            Text("Create a new route rule", style = MaterialTheme.typography.titleLarge)
+                            Text(
+                                "Create a new route rule",
+                                style = MaterialTheme.typography.titleLarge
+                            )
                             Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedTextField(value = newRuleAlias, onValueChange = { newRuleAlias = it }, label = { Text("Alias") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                            OutlinedTextField(
+                                value = newRuleAlias,
+                                onValueChange = { newRuleAlias = it },
+                                label = { Text("Alias") },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true
+                            )
                             ExposedDropdownMenuBox(
                                 expanded = isNewEmailListDropDownExpanded,
-                                onExpandedChange = { isNewEmailListDropDownExpanded = !isNewEmailListDropDownExpanded },
+                                onExpandedChange = {
+                                    isNewEmailListDropDownExpanded = !isNewEmailListDropDownExpanded
+                                },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 OutlinedTextField(
@@ -433,7 +516,9 @@ fun ManageRoutesScreen(navController: NavController) {
                                         .menuAnchor()
                                         .fillMaxWidth()
                                 )
-                                ExposedDropdownMenu(expanded = isNewEmailListDropDownExpanded, onDismissRequest = { isNewEmailListDropDownExpanded = false }) {
+                                ExposedDropdownMenu(
+                                    expanded = isNewEmailListDropDownExpanded,
+                                    onDismissRequest = { isNewEmailListDropDownExpanded = false }) {
                                     emailsList.forEach { option: String ->
                                         DropdownMenuItem(
                                             text = { Text(text = option) },
@@ -465,34 +550,45 @@ fun ManageRoutesScreen(navController: NavController) {
                             }
                             Button(onClick = {
 
-                                addRoute(selectedNewRouteAction,newRuleAlias,selectedTargetEmailNewRoute,context) {
+                                addRoute(
+                                    selectedNewRouteAction,
+                                    newRuleAlias,
+                                    selectedTargetEmailNewRoute,
+                                    context
+                                ) {
                                     scope.launch {
-                                        snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                        snackbarHostState.showSnackbar(
+                                            it,
+                                            duration = SnackbarDuration.Short
+                                        )
                                     }
                                     showBottomSheet = false
                                 }
                             }, modifier = Modifier.fillMaxWidth()) {
                                 Text("Add Target Email")
                             }
-                            Spacer(modifier =Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
                         }
                     }
                 }
-                when{
+                when {
                     routeToBeDeleted != null -> {
                         WarningElementDeletion(
                             onDismissRequest = { routeToBeDeleted = null },
                             onConfirmation = {
-                                deleteRoute(routeId = routeToBeDeleted!!.id,context = context) {
+                                deleteRoute(routeId = routeToBeDeleted!!.id, context = context) {
                                     scope.launch {
-                                        snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                        snackbarHostState.showSnackbar(
+                                            it,
+                                            duration = SnackbarDuration.Short
+                                        )
                                     }
                                 }
                                 routeToBeDeleted = null
                             },
                             target = routeToBeDeleted!!.name,
-                            target_id = routeToBeDeleted!!.id ,
+                            target_id = routeToBeDeleted!!.id,
                             isEmail = false
                         )
                     }
