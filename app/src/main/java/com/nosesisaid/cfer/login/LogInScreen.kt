@@ -63,7 +63,7 @@ public fun SingInScreen(navController: NavController) {
     val sharedPref = context.getSharedPreferences("cfer", Context.MODE_PRIVATE)
 
     if (sharedPref.contains("zoneId") && sharedPref.contains("APIKey") && sharedPref.contains("userId") && sharedPref.contains("domain")) {
-        navController.navigate("manageEmails")
+        navController.navigate("manageRoutes")
     }
 
 

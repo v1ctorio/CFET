@@ -51,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -69,8 +70,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageEmailsScreen(navController: NavController) {
-
-
+    val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -78,25 +78,17 @@ fun ManageEmailsScreen(navController: NavController) {
     val exampleResponse = emailListResponse(
         result = listOf(
             email(
-                created = "2024-08-01T12:00:00Z",
-                email = "example1@example.com",
-                id = "1",
-                modified = "2024-08-02T12:00:00Z",
-                tag = "newsletter",
-                verified = "true"
-            ),
-            email(
-                created = "2024-08-01T13:00:00Z",
-                email = "example2@example.com",
-                id = "2",
-                modified = "2024-08-02T13:00:00Z",
-                tag = "promotion",
-                verified = "false"
+                created = "EMPTY",
+                email = "EMPTY",
+                id = "EMPTY",
+                modified = "EMPTY",
+                tag = "EMPTY",
+                verified = "EMPTY"
             )
         ),
         success = true,
         result_info = resultInfo(
-            count = 2,
+            count = 1,
             page = 1,
             per_page = 10,
             total_count = 2
@@ -115,7 +107,7 @@ fun ManageEmailsScreen(navController: NavController) {
             if (response != null) {
                 emails = response.result
             } else {
-                //TODO
+                emails = exampleResponse.result
             }
             isLoading = false
         }
@@ -139,7 +131,17 @@ topBar = { TopAppBar(
     colors = topAppBarColors(
         containerColor = MaterialTheme.colorScheme.primaryContainer,
         titleContentColor = MaterialTheme.colorScheme.primary
-    ))},
+    ),
+    actions = {
+        IconButton(onClick = { uriHandler.openUri("https://github.com/v1ctorio/cloudlfare-email-manager") }) {
+            Icon(
+                painter = painterResource(id = R.drawable.baseline_code_24),
+                contentDescription = "source code"
+            )
+
+        }
+    }
+)},
         bottomBar = { CFERNavigationBar(
             isEmailsSelected = true,
             nav = navController
@@ -197,7 +199,6 @@ topBar = { TopAppBar(
                     CircularProgressIndicator(modifier = Modifier.align(alignment = Alignment.Center))
                 } else {
                     LazyColumn(
-
                         modifier = Modifier.fillMaxSize(),
                         content
                         = {
@@ -256,7 +257,9 @@ topBar = { TopAppBar(
 
                                         IconButton(onClick = {
                                             openDialogIdOfThing.value = email
-                                        }, modifier = Modifier.fillMaxWidth().padding(end = 16.dp)) {
+                                        }, modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(end = 16.dp)) {
                                             Icon(
                                                 painter = painterResource(id = R.drawable.baseline_delete_forever_24),
                                                 contentDescription = "Delete"

@@ -62,6 +62,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.R
+import com.nosesisaid.cfer.login.logOut
 import com.nosesisaid.cfer.management.api.addRoute
 import com.nosesisaid.cfer.management.api.deleteRoute
 import com.nosesisaid.cfer.management.api.fetchEmails
@@ -165,7 +166,16 @@ fun ManageRoutesScreen(navController: NavController) {
             colors = topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 titleContentColor = MaterialTheme.colorScheme.primary
-            ))},
+            ),
+            actions = {
+                IconButton(onClick = { logOut(context) {
+                    navController.navigate("login")
+                } }) {
+                    Icon(painter = painterResource(id = R.drawable.baseline_logout_24), contentDescription = "Log out from CFET")
+                }
+            }
+        )
+                 },
         bottomBar = { CFERNavigationBar(
             isEmailsSelected = false,
             nav = navController
