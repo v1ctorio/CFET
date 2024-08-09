@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -38,7 +37,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -275,7 +273,7 @@ topBar = { TopAppBar(
 
             when {
                 openDialogIdOfThing.value != null -> {
-                    WarningEmailDeletion(
+                    WarningElementDeletion(
                         onDismissRequest = { openDialogIdOfThing.value = null },
                         onConfirmation = { id ->
 
@@ -289,7 +287,9 @@ topBar = { TopAppBar(
                             openDialogIdOfThing.value = null
                             }
                         },
-                        target_email = openDialogIdOfThing.value!!
+                        target = openDialogIdOfThing.value!!.email,
+                        target_id = openDialogIdOfThing.value!!.id,
+                        isEmail = true
                     )
                 }
             }
@@ -348,46 +348,3 @@ topBar = { TopAppBar(
     }
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun WarningEmailDeletion(
-    onDismissRequest: () -> Unit,
-    onConfirmation: (String) -> Unit,
-    //target_email: String,
-    //email_id:String
-    target_email: email
-) {
-    AlertDialog(
-        icon = {
-            Icon(painter = painterResource(id = R.drawable.baseline_delete_forever_24), contentDescription = "Delete icon")
-        },
-        title = {
-            Text(text = "Are you sure you want to delete this email?")
-        },
-        text = {
-            Text(text = "If you click confirm, ${target_email.email} will be removed from your account.")
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation(target_email.id)
-                }
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Dismiss")
-            }
-        }
-    )
-}

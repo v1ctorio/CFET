@@ -63,6 +63,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.navigation.NavController
 import com.nosesisaid.cfer.R
 import com.nosesisaid.cfer.management.api.addRoute
+import com.nosesisaid.cfer.management.api.deleteRoute
 import com.nosesisaid.cfer.management.api.fetchEmails
 import com.nosesisaid.cfer.management.api.fetchRoutes
 import com.nosesisaid.cfer.management.api.route
@@ -114,7 +115,7 @@ fun ManageRoutesScreen(navController: NavController) {
 
     var enabledStates by remember { mutableStateOf(mutableMapOf<String, Boolean>()) }
 
-    var stateVersion by remember { mutableStateOf(0) }
+    var routeToBeDeleted by remember { mutableStateOf<route?>(null) }
 
     LaunchedEffect(Unit) {
         fetchEmails(1, context) { r ->
@@ -313,7 +314,9 @@ fun ManageRoutesScreen(navController: NavController) {
                                             }
 
                                         }, modifier = Modifier.scale(0.6f))
-                                        IconButton(onClick = { /*TODO*/ }) {
+                                        IconButton(onClick = {
+                                            routeToBeDeleted = r
+                                        }) {
                                             Icon(painter = painterResource(id = R.drawable.baseline_delete_forever_24), contentDescription = "Delete rule")
                                         }
                                     }
@@ -323,6 +326,22 @@ fun ManageRoutesScreen(navController: NavController) {
                         }
                     )
                 }
+                Spacer(modifier =Modifier.height(12.dp))
+                Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                )) {
+
+                    Row(
+                    ) {
+                        Text("Drop adresses",modifier= Modifier
+                            .padding(16.dp),
+                            textAlign = TextAlign.Center,
+                            style = Typography.titleMedium
+                        )
+
+                    }
+                }
+
 
                 if (showBottomSheet) {
                     ModalBottomSheet(sheetState = sheetState, modifier = Modifier.fillMaxHeight(), onDismissRequest = { showBottomSheet = false }) {
@@ -395,6 +414,24 @@ fun ManageRoutesScreen(navController: NavController) {
                             Spacer(modifier =Modifier.height(16.dp))
 
                         }
+                    }
+                }
+                when{
+                    routeToBeDeleted != null -> {
+                        WarningElementDeletion(
+                            onDismissRequest = { routeToBeDeleted = null },
+                            onConfirmation = {
+                                deleteRoute(routeId = routeToBeDeleted!!.id,context = context) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+                                    }
+                                }
+                                routeToBeDeleted = null
+                            },
+                            target = routeToBeDeleted!!.name,
+                            target_id = routeToBeDeleted!!.id ,
+                            isEmail = false
+                        )
                     }
                 }
             }
