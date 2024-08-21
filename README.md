@@ -1,6 +1,6 @@
 # Cloudflare Email Thingie
 
-![CFET banner](./extra/repo_assets/CFET%20banner.png)
+![CFET banner](https://github.com/user-attachments/assets/e0b0f892-b2d0-47ae-a31a-bec8d3e82d81)
 
 
 Download right now on the [releases tab](https://github.com/v1ctorio/CFET/releases)!!1! Code compiled by GH Actions
@@ -15,5 +15,5 @@ It communicates directly with the Cloudflare API in your device using an API tok
 
 | Dark Mode     | Light Mode      |
 | ------------- | ------------- |
-| ![dark mode emails](./extra/repo_assets/dark_mode_emails.jpg) | ![light mode target email](./extra/repo_assets/new_target_email.jpg) |
-| ![dark mode routes](./extra/repo_assets/dark_mode_routes.jpg) | ![light mode new route](./extra/repo_assets/create_new_route.jpg) |
+| ![dark mode emails](https://github.com/user-attachments/assets/91b31b97-16eb-4ae3-b716-e58de1a03a59) | ![light mode target email](https://github.com/user-attachments/assets/02639a86-6255-462d-aa0b-e1bc7275bf94) |
+| ![dark mode routes](https://github.com/user-attachments/assets/1da45612-54cf-4be2-a459-4168bb487ddf) | ![light mode new route](https://github.com/user-attachments/assets/157547b7-7464-4ad0-baf4-643bb2863f41) |
